@@ -1,11 +1,13 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.test;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.changes;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrent;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrentAndHistory;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.stopRobot;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
+import static org.firstinspires.ftc.teamcode.test.Tuning.changes;
+import static org.firstinspires.ftc.teamcode.test.Tuning.drawCurrent;
+import static org.firstinspires.ftc.teamcode.test.Tuning.drawCurrentAndHistory;
+import static org.firstinspires.ftc.teamcode.test.Tuning.follower;
+import static org.firstinspires.ftc.teamcode.test.Tuning.stopRobot;
+import static org.firstinspires.ftc.teamcode.test.Tuning.telemetryM;
+
+import org.firstinspires.ftc.teamcode.subsystems.Drive.Constants;
 
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
@@ -205,6 +207,7 @@ class ForwardTuner extends OpMode {
         telemetryM.debug("The multiplier will display what your forward ticks to inches should be to scale your current distance to " + DISTANCE + " inches.");
         telemetryM.debug("Multiplier: " + (DISTANCE / (follower.getPose().getX() / follower.getPoseTracker().getLocalizer().getForwardMultiplier())));
         telemetryM.update(telemetry);
+
 
         drawCurrentAndHistory();
     }
@@ -726,58 +729,7 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
  * @author Harrison Womack - 10158 Scott's Bots
  * @version 1.0, 3/12/2024
  */
-class TranslationalTuner extends OpMode {
-    public static double DISTANCE = 40;
-    private boolean forward = true;
 
-    private Path forwards;
-    private Path backwards;
-
-    @Override
-    public void init() {}
-
-    /** This initializes the Follower and creates the forward and backward Paths. */
-    @Override
-    public void init_loop() {
-        telemetryM.debug("This will activate the translational PIDF(s)");
-        telemetryM.debug("The robot will try to stay in place while you push it laterally.");
-        telemetryM.debug("You can adjust the PIDF values to tune the robot's translational PIDF(s).");
-        telemetryM.update(telemetry);
-        follower.update();
-        drawCurrent();
-    }
-
-    @Override
-    public void start() {
-        follower.deactivateAllPIDFs();
-        follower.activateTranslational();
-        forwards = new Path(new BezierLine(new Pose(0,0), new Pose(DISTANCE,0)));
-        forwards.setConstantHeadingInterpolation(0);
-        backwards = new Path(new BezierLine(new Pose(DISTANCE,0), new Pose(0,0)));
-        backwards.setConstantHeadingInterpolation(0);
-        follower.followPath(forwards);
-    }
-
-    /** This runs the OpMode, updating the Follower as well as printing out the debug statements to the Telemetry */
-    @Override
-    public void loop() {
-        follower.update();
-        drawCurrentAndHistory();
-
-        if (!follower.isBusy()) {
-            if (forward) {
-                forward = false;
-                follower.followPath(backwards);
-            } else {
-                forward = true;
-                follower.followPath(forwards);
-            }
-        }
-
-        telemetryM.debug("Push the robot laterally to test the Translational PIDF(s).");
-        telemetryM.update(telemetry);
-    }
-}
 
 /**
  * This is the Heading PIDF Tuner OpMode. It will keep the robot in place.
@@ -1059,7 +1011,58 @@ class CentripetalTuner extends OpMode {
         telemetryM.update(telemetry);
     }
 }
+class TranslationalTuner extends OpMode {
+    public static double DISTANCE = 40;
+    private boolean forward = true;
 
+    private Path forwards;
+    private Path backwards;
+
+    @Override
+    public void init() {}
+
+    /** This initializes the Follower and creates the forward and backward Paths. */
+    @Override
+    public void init_loop() {
+        telemetryM.debug("This will activate the translational PIDF(s)");
+        telemetryM.debug("The robot will try to stay in place while you push it laterally.");
+        telemetryM.debug("You can adjust the PIDF values to tune the robot's translational PIDF(s).");
+        telemetryM.update(telemetry);
+        follower.update();
+        drawCurrent();
+    }
+
+    @Override
+    public void start() {
+        follower.deactivateAllPIDFs();
+        follower.activateTranslational();
+        forwards = new Path(new BezierLine(new Pose(0,0), new Pose(DISTANCE,0)));
+        forwards.setConstantHeadingInterpolation(0);
+        backwards = new Path(new BezierLine(new Pose(DISTANCE,0), new Pose(0,0)));
+        backwards.setConstantHeadingInterpolation(0);
+        follower.followPath(forwards);
+    }
+
+    /** This runs the OpMode, updating the Follower as well as printing out the debug statements to the Telemetry */
+    @Override
+    public void loop() {
+        follower.update();
+        drawCurrentAndHistory();
+
+        if (!follower.isBusy()) {
+            if (forward) {
+                forward = false;
+                follower.followPath(backwards);
+            } else {
+                forward = true;
+                follower.followPath(forwards);
+            }
+        }
+
+        telemetryM.debug("Push the robot laterally to test the Translational PIDF(s).");
+        telemetryM.update(telemetry);
+    }
+}
 /**
  * This is the Triangle autonomous OpMode.
  * It runs the robot in a triangle, with the starting point being the bottom-middle point.

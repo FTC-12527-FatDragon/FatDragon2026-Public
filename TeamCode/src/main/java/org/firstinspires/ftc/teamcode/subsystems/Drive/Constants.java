@@ -29,9 +29,9 @@ public class Constants {
             ))
             .translationalPIDFSwitch(2.5)
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
+                    0.1,
                     0,
                     0,
-                    0.09,
                     0.03
             ))
             .headingPIDFSwitch(0)

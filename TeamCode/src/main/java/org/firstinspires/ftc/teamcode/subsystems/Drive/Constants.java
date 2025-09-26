@@ -36,16 +36,16 @@ public class Constants {
             ))
             .headingPIDFSwitch(0)
             .headingPIDFCoefficients(new PIDFCoefficients(
+                    0.55,
                     0,
-                    0,
-                    0,
-                    0
+                    0.02,
+                    0.04
             ))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
+                    0.5,
                     0,
-                    0,
-                    0,
-                    0
+                    0.03,
+                    0.02
             ))
             .drivePIDFSwitch(0)
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(

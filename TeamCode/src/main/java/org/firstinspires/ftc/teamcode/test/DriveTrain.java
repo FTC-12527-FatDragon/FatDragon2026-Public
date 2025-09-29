@@ -1,10 +1,6 @@
 package org.firstinspires.ftc.teamcode.test;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.linearOpMode;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -13,42 +9,37 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class DriveTrain extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        double y = 0, x = 0, pivot = 0;
-        double RFPower, LFPower, RBPower, LBpower;
+        DcMotor RF = hardwareMap.get(DcMotor.class, "rightFrontMotor");
+        DcMotor LF = hardwareMap.get(DcMotor.class, "leftFrontMotor");
+        DcMotor RB = hardwareMap.get(DcMotor.class, "rightBackMotor");
+        DcMotor LB = hardwareMap.get(DcMotor.class, "leftBackMotor");
 
-        DcMotor RF;
-        DcMotor LF;
-        DcMotor RB;
-        DcMotor LB;
-
-        RF = hardwareMap.get(DcMotor.class, "rightFrontMotor");
-        LF = hardwareMap.get(DcMotor.class, "leftFrontMotor");
-        RB = hardwareMap.get(DcMotor.class, "rightBackMotor");
-        LB = hardwareMap.get(DcMotor.class, "leftBackMotor");
-
+        // 右侧反转，左侧正转（常见接法）
         RF.setDirection(DcMotorSimple.Direction.REVERSE);
-        LF.setDirection(DcMotorSimple.Direction.FORWARD);
         RB.setDirection(DcMotorSimple.Direction.REVERSE);
+        LF.setDirection(DcMotorSimple.Direction.FORWARD);
         LB.setDirection(DcMotorSimple.Direction.FORWARD);
 
         waitForStart();
 
         while (opModeIsActive()) {
-            y = gamepad1.left_stick_y;
-            x = gamepad1.left_stick_x;
-            pivot = gamepad1.right_stick_x;
+            double y  = -gamepad1.left_stick_y;   // 前推为正
+            double x  =  gamepad1.left_stick_x;   // 右为正
+            double rx =  gamepad1.right_stick_x;  // 顺时针为正
 
-            RFPower = -y - x + pivot;
-            LFPower = y + x - pivot;
-            RBPower = y + x + pivot;
-            LBpower = -y - x - pivot;
+            double denom = Math.max(1.0, Math.abs(y) + Math.abs(x) + Math.abs(rx));
 
-            RF.setPower(RFPower);
-            LF.setPower(LFPower);
-            RB.setPower(RBPower);
-            LB.setPower(LBpower);
+            double lf = (y + x + rx) / denom;
+            double lb = (y - x + rx) / denom;
+            double rf = (y - x - rx) / denom;
+            double rb = (y + x - rx) / denom;
 
+            LF.setPower(lf);
+            LB.setPower(lb);
+            RF.setPower(rf);
+            RB.setPower(rb);
+
+            idle();
         }
-
     }
 }

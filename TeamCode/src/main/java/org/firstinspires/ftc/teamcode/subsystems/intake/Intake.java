@@ -12,9 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Intake extends SubsystemBase {
     public final DcMotor intakeMotor;
 
-
-
-    public static boolean isRunning, motorReversed;
+    public static boolean isRunning;
 
     public Intake(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotor.class, IntakeConstants.intakeMotorName);
@@ -29,8 +27,6 @@ public class Intake extends SubsystemBase {
         isRunning = !isRunning;
     }
 
-    public void reverseMotor(boolean inverse) { motorReversed = inverse; }
-
     public boolean isRunning() {
         return isRunning;
     }
@@ -38,18 +34,10 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         if (isRunning) {
-            if (motorReversed) {
-                intakeMotor.setPower(IntakeConstants.reversedPower);
-            } else {
-                intakeMotor.setPower(IntakeConstants.intakePower);
-            }
-
+            intakeMotor.setPower(IntakeConstants.intakePower);
         }
         else {
             intakeMotor.setPower(0);
-
         }
-
-
     }
 }

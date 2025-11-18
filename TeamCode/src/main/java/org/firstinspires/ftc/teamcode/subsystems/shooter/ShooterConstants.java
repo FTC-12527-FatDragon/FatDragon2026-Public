@@ -5,8 +5,8 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class ShooterConstants {
-    public static String upShooterName = "upShooter";
-    public static String downShooterName = "downShooter";
+    public static String upShooterName = "upShooterMotor";
+    public static String downShooterName = "downShooterMotor";
 
     public static double shooterEpsilon = 50;
 

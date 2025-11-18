@@ -13,7 +13,7 @@ public class Wheel extends SubsystemBase {
 
     public double upwardServoPosition = WheelConstants.offPosition;
 
-    public WheelServoState wheelState = WheelServoState.ONE;
+    public WheelServoState wheelState = WheelServoState.IDLE;
 
 
     public Wheel(HardwareMap hardwareMap) {
@@ -23,15 +23,15 @@ public class Wheel extends SubsystemBase {
     }
 
     public enum WheelServoState {
-        IDLE(WheelConstants.idleAngle),
-        ONE(WheelConstants.oneAngle),        //1
-        TWO(WheelConstants.twoAngle),     //2
-        THREE (WheelConstants.threeAngle);    //3
+        IDLE(WheelConstants.posIDLE),
+        ONE(WheelConstants.posOne),
+        TWO(WheelConstants.posTwo),
+        THREE (WheelConstants.posThree);
 
-        final double setAngle;
+        final double servoPos;
 
-        WheelServoState(double setAngle){
-            this.setAngle = setAngle;
+        WheelServoState(double servoPos){
+            this.servoPos = servoPos;
         }
     }
 
@@ -46,6 +46,6 @@ public class Wheel extends SubsystemBase {
     @Override
     public void periodic() {
         upwardServo.setPosition(upwardServoPosition);
-        
+        wheelServo.setPosition(wheelState.servoPos);
     }
 }

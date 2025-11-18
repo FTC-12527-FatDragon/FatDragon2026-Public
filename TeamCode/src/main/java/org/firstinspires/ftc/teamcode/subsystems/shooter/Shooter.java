@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.utils.DcMotorRe;
 import org.firstinspires.ftc.teamcode.utils.Util;
 
 public class Shooter extends SubsystemBase {
-    public final DcMotorRe shooter;
+    public final DcMotorRe shooterUp, shooterDown;
     public final PIDController pidController;
     public static double shooterOpenLoopPower = -1;
 
@@ -31,17 +31,18 @@ public class Shooter extends SubsystemBase {
     public ShooterState shooterState = ShooterState.STOP;
 
     public Shooter(final HardwareMap hardwareMap) {
-        shooter = new DcMotorRe(hardwareMap, "shooterMotor");
+        shooterUp = new DcMotorRe(hardwareMap, ShooterConstants.upShooterName);
+        shooterDown = new DcMotorRe(hardwareMap, ShooterConstants.downShooterName);
         pidController = new PIDController(ShooterConstants.kP,
                 ShooterConstants.kI, ShooterConstants.kD);
     }
 
     public double getAverageVelocity() {
-        return shooter.getAverageVelocity();
+        return shooterUp.getAverageVelocity();
     }
 
     public double getInstantVelocity() {
-        return shooter.getInstantVelocity();
+        return shooterUp.getInstantVelocity();
     }
 
     public void toggleShooterState(ShooterState shooterStateE) {
@@ -64,17 +65,17 @@ public class Shooter extends SubsystemBase {
 
     public boolean isShooterAtSetPoint() {
         return Util.epsilonEqual(shooterState.shooterVelocity,
-                shooter.getLibVelocity(), ShooterConstants.shooterEpsilon);
+                shooterUp.getLibVelocity(), ShooterConstants.shooterEpsilon);
     }
 
     @Override
     public void periodic() {
         if (shooterState != ShooterState.OPENLOOP) {
-            if (shooterState != ShooterState.STOP) shooter.setPower(pidController.calculate(
-                    shooter.getLibVelocity(), shooterState.shooterVelocity));
-            else shooter.setPower(ShooterState.STOP.shooterVelocity);
+            if (shooterState != ShooterState.STOP) shooterUp.setPower(pidController.calculate(
+                    shooterUp.getLibVelocity(), shooterState.shooterVelocity));
+            else shooterUp.setPower(ShooterState.STOP.shooterVelocity);
         }
-        else shooter.setPower(shooterOpenLoopPower);
-        shooter.updateLastPos();
+        else shooterUp.setPower(shooterOpenLoopPower);
+        shooterUp.updateLastPos();
     }
 }

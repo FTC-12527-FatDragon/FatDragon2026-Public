@@ -9,12 +9,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Wheel extends SubsystemBase {
 
     public final Servo wheelServo;
-
     public final Servo upwardServo;
 
+    public double upwardServoPosition = WheelConstants.offPosition;
 
-    public wheelServoState wheelState = wheelServoState.ONE;
-    public upwardServoState upwardtate = Wheel.upwardServoState.OFF;
+    public WheelServoState wheelState = WheelServoState.ONE;
 
 
     public Wheel(HardwareMap hardwareMap) {
@@ -23,46 +22,30 @@ public class Wheel extends SubsystemBase {
         upwardServo = hardwareMap.get(Servo.class, WheelConstants.upwardServoName);
     }
 
-    public enum upwardServoState {
-        OFF(WheelConstants.off),        // 关闭
-        INTAKE(WheelConstants.intake),     // 吸入
-        OUTTAKE (WheelConstants.outtake);    // 吐出
-
-        final double setPower;
-
-        upwardServoState(double setPower){
-            this.setPower = setPower;
-        }
-    }
-
-    public enum wheelServoState {
-        ONE(WheelConstants.oneAngle),        //1号位
-        TWO(WheelConstants.twoAngle),     // 2号位置
-        THREE (WheelConstants.threeAngle);    //  3号位置
+    public enum WheelServoState {
+        IDLE(WheelConstants.idleAngle),
+        ONE(WheelConstants.oneAngle),        //1
+        TWO(WheelConstants.twoAngle),     //2
+        THREE (WheelConstants.threeAngle);    //3
 
         final double setAngle;
 
-        wheelServoState(double setAngle){
+        WheelServoState(double setAngle){
             this.setAngle = setAngle;
         }
     }
 
-    public void setWheelStateToOne(){
-        wheelState = wheelServoState.ONE;
+    public void setWheelState(Wheel.WheelServoState state){
+        wheelState = state;
     }
 
-    public void setWheelStateToTwo(){
-        wheelState = wheelServoState.TWO;
+    public void toggleUpwardServo() {
+        upwardServoPosition = upwardServoPosition == 0.5? 1: 0.5;
     }
-
-    public void setWheelStateToThree(){
-        wheelState = wheelServoState.THREE;
-    }
-
-    public void 
 
     @Override
     public void periodic() {
-
+        upwardServo.setPosition(upwardServoPosition);
+        
     }
 }

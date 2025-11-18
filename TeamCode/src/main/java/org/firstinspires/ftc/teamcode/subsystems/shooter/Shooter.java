@@ -38,11 +38,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getAverageVelocity() {
-        return shooterUp.getAverageVelocity();
+        return (shooterUp.getAverageVelocity()+shooterDown.getAverageVelocity())/2;
     }
 
-    public double getInstantVelocity() {
+    public double getInstantVelocityUp() {
         return shooterUp.getInstantVelocity();
+    }
+
+    public double getInstantVelocityDown() {
+        return shooterDown.getInstantVelocity();
     }
 
     public void toggleShooterState(ShooterState shooterStateE) {

@@ -12,10 +12,8 @@ public class WheelConstants {
 
     public static double offPosition = 0.5;
 
-    public static double idleAngle = 0;
-    public static double oneAngle = 0.5;
-    public static double twoAngle = 0;
-    public static double threeAngle = 0;
-
-    public static double wheelServoState[] = {1 ,2 ,3};
+    public static double posIDLE = 0;
+    public static double posOne = 0.5;
+    public static double posTwo = 0;
+    public static double posThree = 0;
 }

@@ -15,20 +15,33 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
+import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 
+/**
+ * Solo TeleOp OpMode
+ *
+ * This OpMode controls the robot during the driver-controlled period.
+ * It initializes the drive subsystem and maps gamepad inputs to robot actions.
+ */
 @Config
 @Configurable
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpAlpha")
 public class Solo extends CommandOpMode {
     private MecanumDriveOTOS drive;
+    private Shooter shooter;
     private Telemetry telemetryM;
     private GamepadEx gamepadEx1;
     private boolean[] isAuto = {false};
 
+    /**
+     * Initializes the OpMode.
+     * Sets up the hardware, gamepads, and commands.
+     */
     @Override
     public void initialize() {
         drive = new MecanumDriveOTOS(hardwareMap);
+        shooter = new Shooter(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
 
 
@@ -40,8 +53,20 @@ public class Solo extends CommandOpMode {
         ).whenPressed(
                 new InstantCommand(() -> drive.reset(0))
         );
+
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.A)
+        ).whenHeld(
+                new InstantCommand(() -> shooter.setOpenLoopPower(0.7))
+        ).whenReleased(
+                new InstantCommand(() -> shooter.setOpenLoopPower(0))
+        );
     }
 
+    /**
+     * The main loop of the OpMode.
+     * Runs the command scheduler and updates telemetry.
+     */
     @Override
     public void run() {
         telemetryM = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());

@@ -11,6 +11,12 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.subsystems.drive.Constants;
 
+/**
+ * Example Auto OpMode
+ *
+ * This is an example autonomous program using Pedro Pathing.
+ * It demonstrates how to create paths, chain them together, and execute them using a state machine.
+ */
 @Autonomous(name = "Example Auto", group = "Examples")
 public class ExampleAuto extends OpMode {
 
@@ -28,6 +34,9 @@ public class ExampleAuto extends OpMode {
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
 
+    /**
+     * Builds all the paths and path chains used in this autonomous.
+     */
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
         scorePreload = new Path(new BezierLine(startPose, scorePose));
@@ -73,6 +82,10 @@ public class ExampleAuto extends OpMode {
                 .build();
     }
 
+    /**
+     * Updates the state machine for the autonomous path execution.
+     * This method is called repeatedly in the loop() method.
+     */
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
@@ -80,7 +93,7 @@ public class ExampleAuto extends OpMode {
                 setPathState(1);
                 break;
             case 1:
-
+            
             /* You could check for
             - Follower State: "if(!follower.isBusy()) {}"
             - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"

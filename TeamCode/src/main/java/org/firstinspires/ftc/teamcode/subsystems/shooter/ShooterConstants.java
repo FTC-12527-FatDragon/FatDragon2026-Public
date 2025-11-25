@@ -15,7 +15,7 @@ public class ShooterConstants {
     public static double kD = 0;
     public static double stopPower = 0;
     public static double slowPower = 0.575;
-    public static double fastPower = 0.675;
+    public static double fastPower = 0.8;
 
     /**
      * In Ticks Per Second

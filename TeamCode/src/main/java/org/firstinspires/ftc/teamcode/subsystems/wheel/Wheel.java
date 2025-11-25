@@ -6,6 +6,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+/**
+ * Wheel Subsystem
+ *
+ * This subsystem controls the "Wheel" mechanism, which includes a servo for rotating the wheel
+ * and another servo for moving it up and down.
+ */
 public class Wheel extends SubsystemBase {
 
     public final Servo wheelServo;
@@ -16,12 +22,21 @@ public class Wheel extends SubsystemBase {
     public WheelServoState wheelState = WheelServoState.ONE;
 
 
+    /**
+     * Constructor for Wheel.
+     * Initializes the servos.
+     *
+     * @param hardwareMap The hardware map to get the servos.
+     */
     public Wheel(HardwareMap hardwareMap) {
         wheelServo = hardwareMap.get(Servo.class, WheelConstants.wheelServoName);
 
         upwardServo = hardwareMap.get(Servo.class, WheelConstants.upwardServoName);
     }
 
+    /**
+     * Enum for the different states of the wheel servo.
+     */
     public enum WheelServoState {
         IDLE(WheelConstants.idleAngle),
         ONE(WheelConstants.oneAngle),        //1
@@ -35,14 +50,27 @@ public class Wheel extends SubsystemBase {
         }
     }
 
+    /**
+     * Sets the state of the wheel servo.
+     *
+     * @param state The target state.
+     */
     public void setWheelState(Wheel.WheelServoState state){
         wheelState = state;
     }
 
+    /**
+     * Toggles the upward servo position between two preset values.
+     */
     public void toggleUpwardServo() {
         upwardServoPosition = upwardServoPosition == 0.5? 1: 0.5;
     }
 
+    /**
+     * Periodic method called by the CommandScheduler.
+     * Updates the upward servo position.
+     * Note: wheelServo position update is missing here, intentional?
+     */
     @Override
     public void periodic() {
         upwardServo.setPosition(upwardServoPosition);

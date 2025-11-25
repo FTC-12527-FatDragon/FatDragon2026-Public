@@ -12,6 +12,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.utils.Util;
 
+/**
+ * MecanumDriveOTOS Subsystem
+ *
+ * This subsystem controls the robot's drivetrain using mecanum wheels and the SparkFun OTOS sensor for localization.
+ * It supports both field-centric and robot-centric driving.
+ */
 @Config
 public class MecanumDriveOTOS extends SubsystemBase {
     private final DcMotor leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor;
@@ -20,6 +26,12 @@ public class MecanumDriveOTOS extends SubsystemBase {
     public static double xPose = DriveConstants.xPoseOTOS, yPose = DriveConstants.yPoseOTOS,
             headingPose = DriveConstants.headingPoseOTOS; // mm
 
+    /**
+     * Constructor for MecanumDriveOTOS.
+     * Initializes motors and the OTOS sensor.
+     *
+     * @param hardwareMap The hardware map to get the motors and sensor.
+     */
     public MecanumDriveOTOS(final HardwareMap hardwareMap) {
         leftFrontMotor = hardwareMap.get(DcMotor.class, "leftFrontMotor");
         leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
@@ -41,10 +53,22 @@ public class MecanumDriveOTOS extends SubsystemBase {
         leftBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
+    /**
+     * Resets the robot's heading.
+     *
+     * @param heading The new heading to set (in radians).
+     */
     public void reset(double heading) {
         yawOffset = otos.getPosition().h + heading;
     }
 
+    /**
+     * Moves the robot relative to the field (Field-Centric Drive).
+     *
+     * @param forward Forward speed.
+     * @param fun     Strafe speed (sideways).
+     * @param turn    Rotation speed.
+     */
     public void moveRobotFieldRelative(double forward, double fun, double turn) {
 
         double botHeading = otos.getPosition().h - yawOffset;
@@ -69,6 +93,13 @@ public class MecanumDriveOTOS extends SubsystemBase {
         rightBackMotor.setPower(rightBackPower);
     }
 
+    /**
+     * Moves the robot relative to itself (Robot-Centric Drive).
+     *
+     * @param forward Forward speed.
+     * @param fun     Strafe speed.
+     * @param turn    Rotation speed.
+     */
     public void moveRobot(double forward, double fun, double turn) {
         double rotX = fun * strafingBalance; // Counteract imperfect strafing
         double rotY = forward;
@@ -88,6 +119,12 @@ public class MecanumDriveOTOS extends SubsystemBase {
         rightBackMotor.setPower(rightBackPower);
     }
 
+    /**
+     * Turns the robot by a relative angle using a simple P control loop (blocking).
+     *
+     * @param angle The angle to turn (relative).
+     * @param power The power to turn at.
+     */
     public void turnRobot(double angle, double power) {
         double preAngle = otos.getPosition().h;
         while (otos.getPosition().h - preAngle < angle) {
@@ -98,6 +135,12 @@ public class MecanumDriveOTOS extends SubsystemBase {
         }
     }
 
+    /**
+     * Turns the robot to an absolute heading using a simple P control loop (blocking).
+     *
+     * @param angle The target absolute heading.
+     * @param power The power to turn at.
+     */
     public void turnRobotTo(double angle, double power) {
         double heading = otos.getPosition().h;
         double needs = (angle - heading) % (2 * Math.PI);
@@ -110,6 +153,11 @@ public class MecanumDriveOTOS extends SubsystemBase {
             }
     }
 
+    /**
+     * Gets the current pose of the robot from the OTOS sensor.
+     *
+     * @return The current Pose2D.
+     */
     public Pose2D getPose() {
         SparkFunOTOS.Pose2D pose = otos.getPosition();
         return new Pose2D(DriveConstants.distanceUnit, pose.x, pose.y, DriveConstants.angleUnit, pose.h);
@@ -122,6 +170,9 @@ public class MecanumDriveOTOS extends SubsystemBase {
                 DriveConstants.headingEpsilon);
     }
 
+    /**
+     * Stops the robot.
+     */
     public void stop() {
         moveRobot(0, 0, 0);
     }

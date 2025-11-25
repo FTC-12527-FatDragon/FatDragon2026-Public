@@ -1,43 +1,30 @@
 package org.firstinspires.ftc.teamcode.subsystems.gimbal;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
-<<<<<<< HEAD
-import org.firstinspires.ftc.teamcode.subsystems.wheel.WheelConstants;
 
 /**
  * Gimbal Subsystem
  *
- * This subsystem controls a single servo gimbal mechanism.
+ * This subsystem controls a single servo gimbal mechanism used to aim or position elements.
+ * It supports preset positions (IDLE, 90, 180) and a custom AIM position.
  */
-=======
->>>>>>> fdefdde21f06d3140254b9ab49af00abe5e6d51a
 public class Gimbal extends SubsystemBase {
 
     public final Servo gimbalServo;
+    public static double gimbalServoPosition = GimbalConstants.posIDLE;
 
-<<<<<<< HEAD
+    public GimbalServoState gimbalState = GimbalServoState.IDLE;
+
     /**
      * Constructor for Gimbal.
      * Initializes the gimbal servo.
      *
      * @param hardwareMap The hardware map to get the servo.
      */
-    public Gimbal(HardwareMap hardwareMap){
-        gimbalServo = hardwareMap.get(Servo.class, WheelConstants.wheelServoName);
-=======
-    public static double gimbalServoPosition = GimbalConstants.posIDLE;
-
-    public GimbalServoState gimbalState = GimbalServoState.IDLE;
-
-
     public Gimbal(HardwareMap hardwareMap) {
         gimbalServo = hardwareMap.get(Servo.class, GimbalConstants.gimbalServoName);
->>>>>>> fdefdde21f06d3140254b9ab49af00abe5e6d51a
     }
 
     public enum GimbalServoState {
@@ -46,7 +33,7 @@ public class Gimbal extends SubsystemBase {
         DEG180(GimbalConstants.posDeg180),
         AIM(gimbalServoPosition);
 
-        double servoPos;
+        final double servoPos;
 
         GimbalServoState(double servoPos){
             this.servoPos = servoPos;

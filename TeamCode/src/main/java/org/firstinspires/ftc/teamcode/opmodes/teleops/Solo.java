@@ -23,6 +23,7 @@ import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.subsystems.shooter.ShooterConstants;
 import org.firstinspires.ftc.teamcode.subsystems.wheel.Wheel;
 import org.firstinspires.ftc.teamcode.subsystems.wheel.WheelConstants;
 import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
@@ -70,11 +71,18 @@ public class Solo extends CommandOpMode {
                 new ResetHeadingCommand(drive)
         );
 
-        // Left Bumper: Shooter Manual
+        // Left Bumper: Far Shot
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_BUMPER)
         ).whenHeld(
-                new ShooterManualCommand(shooter, 0.8)
+                new ShooterManualCommand(shooter, ShooterConstants.shooterPowerFar)
+        );
+
+        // Right Bumper: Near Shot
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.RIGHT_BUMPER)
+        ).whenHeld(
+                new ShooterManualCommand(shooter, ShooterConstants.shooterPowerNear)
         );
 
         // Right Trigger: Launch Single

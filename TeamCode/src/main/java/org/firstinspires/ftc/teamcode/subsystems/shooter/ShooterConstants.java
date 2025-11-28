@@ -14,6 +14,11 @@ public class ShooterConstants {
     public static double kI = 0;
     public static double kD = 0;
     public static double stopPower = 0;
+    
+    // Power levels for Open Loop control
+    public static double shooterPowerNear = 0.575; // Near Shot
+    public static double shooterPowerFar = 0.8;    // Far Shot
+
     public static double slowPower = 0.575;
     public static double fastPower = 0.8;
 

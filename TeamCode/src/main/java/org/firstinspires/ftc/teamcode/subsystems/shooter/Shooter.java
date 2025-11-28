@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.utils.Util;
  */
 public class Shooter extends SubsystemBase {
     public final DcMotorRe shooterUp, shooterDown;
-    public final PIDController pidController;
+    public final PIDController pidControllerUp, pidControllerDown;
     public static double shooterOpenLoopPower = -1;
 
     /**
@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
 
     /**
      * Constructor for Shooter.
-     * Initializes motors and PID controller.
+     * Initializes motors and PID controllers.
      *
      * @param hardwareMap The hardware map to get the motors.
      */
@@ -50,7 +50,10 @@ public class Shooter extends SubsystemBase {
         shooterUp = new DcMotorRe(hardwareMap, ShooterConstants.upShooterName);
         shooterDown = new DcMotorRe(hardwareMap, ShooterConstants.downShooterName);
         shooterDown.setDirection(DcMotorSimple.Direction.REVERSE);
-        pidController = new PIDController(ShooterConstants.kP,
+        
+        pidControllerUp = new PIDController(ShooterConstants.kP,
+                ShooterConstants.kI, ShooterConstants.kD);
+        pidControllerDown = new PIDController(ShooterConstants.kP,
                 ShooterConstants.kI, ShooterConstants.kD);
     }
 
@@ -111,7 +114,9 @@ public class Shooter extends SubsystemBase {
      */
     public boolean isShooterAtSetPoint() {
         return Util.epsilonEqual(shooterState.shooterVelocity,
-                shooterUp.getLibVelocity(), ShooterConstants.shooterEpsilon);
+                shooterUp.getLibVelocity(), ShooterConstants.shooterEpsilon) &&
+               Util.epsilonEqual(shooterState.shooterVelocity,
+                shooterDown.getLibVelocity(), ShooterConstants.shooterEpsilon);
     }
 
     /**
@@ -122,9 +127,11 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         if (shooterState != ShooterState.OPENLOOP) {
             if (shooterState != ShooterState.STOP) {
-                double power = pidController.calculate(shooterUp.getLibVelocity(), shooterState.shooterVelocity);
-                shooterUp.setPower(power);
-                shooterDown.setPower(power);
+                double powerUp = pidControllerUp.calculate(shooterUp.getLibVelocity(), shooterState.shooterVelocity);
+                double powerDown = pidControllerDown.calculate(shooterDown.getLibVelocity(), shooterState.shooterVelocity);
+                
+                shooterUp.setPower(powerUp);
+                shooterDown.setPower(powerDown);
             } else {
                 shooterUp.setPower(ShooterState.STOP.shooterVelocity);
                 shooterDown.setPower(ShooterState.STOP.shooterVelocity);

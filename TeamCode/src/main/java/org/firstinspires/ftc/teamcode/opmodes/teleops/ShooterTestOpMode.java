@@ -38,8 +38,8 @@ public class ShooterTestOpMode extends CommandOpMode {
     public static double UPWARD_POS_LOW = 0.2;
 
     public static long SERVO_WAIT_TIME = 500; // 动作切换等待
-    public static long LUNCH_WAIT_TIME = 0; // 在上面停留时间
-    public static double SHOOTER_POWER = 1.0; 
+    public static long LUNCH_WAIT_TIME = 450; // 在上面停留时间
+    public static double SHOOTER_POWER = 0.8; 
 
     @Override
     public void initialize() {

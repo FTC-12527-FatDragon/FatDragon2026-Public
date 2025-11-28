@@ -6,5 +6,6 @@ import com.acmerobotics.dashboard.config.Config;
 public class IntakeConstants {
     public static String intakeMotorName = "intakeMotor";
 
-    public static double intakePower = 0.7;
+    public static double intakePower = 1.0;
+    public static double reversedPower = -0.7;
 }

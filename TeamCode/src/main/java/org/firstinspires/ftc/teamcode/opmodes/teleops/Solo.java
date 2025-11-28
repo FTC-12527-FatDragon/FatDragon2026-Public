@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
+import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 public class Solo extends CommandOpMode {
     private MecanumDriveOTOS drive;
     private Shooter shooter;
+    private Intake intake;
     private Telemetry telemetryM;
     private GamepadEx gamepadEx1;
     private boolean[] isAuto = {false};
@@ -42,17 +44,18 @@ public class Solo extends CommandOpMode {
     public void initialize() {
         drive = new MecanumDriveOTOS(hardwareMap);
         shooter = new Shooter(hardwareMap);
+        intake = new Intake(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
 
 
-        drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1, isAuto));
+        //drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1, isAuto));
 
 
-        new FunctionalButton(
-                () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-        ).whenPressed(
-                new InstantCommand(() -> drive.reset(0))
-        );
+//        new FunctionalButton(
+//                () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
+//        ).whenPressed(
+//                new InstantCommand(() -> drive.reset(0))
+//        );
 
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.A)
@@ -60,6 +63,14 @@ public class Solo extends CommandOpMode {
                 new InstantCommand(() -> shooter.setOpenLoopPower(0.7))
         ).whenReleased(
                 new InstantCommand(() -> shooter.setOpenLoopPower(0))
+        );
+
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.B)
+        ).whenHeld(
+                new InstantCommand(() -> intake.setRunning(true))
+        ).whenReleased(
+                new InstantCommand(() -> intake.setRunning(false))
         );
     }
 

@@ -43,6 +43,15 @@ public class Intake extends SubsystemBase {
     }
 
     /**
+     * Sets the intake running state directly.
+     *
+     * @param running True to run, false to stop.
+     */
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
+
+    /**
      * Sets the motor direction (Normal/Reversed).
      *
      * @param inverse True for reversed (outtake), false for normal (intake).

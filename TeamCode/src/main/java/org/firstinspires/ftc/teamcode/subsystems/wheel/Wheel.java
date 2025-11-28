@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems.wheel;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -18,8 +16,11 @@ public class Wheel extends SubsystemBase {
     public final Servo upwardServo;
 
     public double upwardServoPosition = WheelConstants.offPosition;
+    public double customWheelPos = WheelConstants.posIDLE;
 
     public WheelServoState wheelState = WheelServoState.IDLE;
+    
+    public int currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
 
 
     /**
@@ -41,7 +42,8 @@ public class Wheel extends SubsystemBase {
         IDLE(WheelConstants.posIDLE),
         ONE(WheelConstants.posOne),
         TWO(WheelConstants.posTwo),
-        THREE (WheelConstants.posThree);
+        THREE (WheelConstants.posThree),
+        CUSTOM(0);
 
         final double servoPos;
 
@@ -59,21 +61,46 @@ public class Wheel extends SubsystemBase {
         wheelState = state;
     }
 
+    public void setCustomWheelPos(double pos) {
+        wheelState = WheelServoState.CUSTOM;
+        customWheelPos = pos;
+    }
+    
+    public void setUpwardServoPosition(double pos) {
+        upwardServoPosition = pos;
+    }
+
     /**
      * Toggles the upward servo position between two preset values.
      */
     public void toggleUpwardServo() {
         upwardServoPosition = upwardServoPosition == 0.5? 1: 0.5;
     }
+    
+    public void nextSlot() {
+        currentSlotIndex++;
+        if (currentSlotIndex >= WheelConstants.WHEEL_SLOTS.length) {
+            currentSlotIndex = 0; 
+        }
+        setCustomWheelPos(WheelConstants.WHEEL_SLOTS[currentSlotIndex]);
+    }
+
+    public void resetSlot() {
+        currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
+        setCustomWheelPos(WheelConstants.WHEEL_SLOTS[currentSlotIndex]);
+    }
 
     /**
      * Periodic method called by the CommandScheduler.
      * Updates the upward servo position.
-     * Note: wheelServo position update is missing here, intentional?
      */
     @Override
     public void periodic() {
         upwardServo.setPosition(upwardServoPosition);
-        wheelServo.setPosition(wheelState.servoPos);
+        if (wheelState == WheelServoState.CUSTOM) {
+            wheelServo.setPosition(customWheelPos);
+        } else {
+            wheelServo.setPosition(wheelState.servoPos);
+        }
     }
 }

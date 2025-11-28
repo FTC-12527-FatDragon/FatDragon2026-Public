@@ -13,7 +13,13 @@ import com.bylazar.configurables.annotations.Configurable;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.commands.IntakeRunCommand;
+import org.firstinspires.ftc.teamcode.commands.LaunchSingleCommand;
+import org.firstinspires.ftc.teamcode.commands.ResetHeadingCommand;
+import org.firstinspires.ftc.teamcode.commands.ShooterManualCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
+import org.firstinspires.ftc.teamcode.commands.WheelNextSlotCommand;
+import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
@@ -51,6 +57,9 @@ public class Solo extends CommandOpMode {
         wheel = new Wheel(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
 
+        // initialize Wheel position
+        wheel.resetSlot();
+        wheel.setUpwardServoPosition(WheelConstants.upwardServoLow);
 
         drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1, isAuto));
 
@@ -58,42 +67,49 @@ public class Solo extends CommandOpMode {
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
         ).whenPressed(
-                new InstantCommand(() -> drive.reset(0))
+                new ResetHeadingCommand(drive)
         );
 
+        // Left Bumper: Shooter Manual
         new FunctionalButton(
-                () -> gamepadEx1.getButton(GamepadKeys.Button.A)
+                () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_BUMPER)
         ).whenHeld(
-                new InstantCommand(() -> shooter.setOpenLoopPower(0.7))
-        ).whenReleased(
-                new InstantCommand(() -> shooter.setOpenLoopPower(0))
+                new ShooterManualCommand(shooter, 0.8)
         );
 
+        // Right Trigger: Launch Single
+        new FunctionalButton(
+                () -> gamepadEx1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
+        ).whenPressed(
+                new LaunchSingleCommand(wheel)
+        );
+
+        // D-Pad Down: Next Slot
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_DOWN)
+        ).whenPressed(
+                new WheelNextSlotCommand(wheel)
+        );
+
+        // B Button: Intake Reverse
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.B)
         ).whenHeld(
-                new InstantCommand(() -> intake.setRunning(true))
-        ).whenReleased(
-                new InstantCommand(() -> intake.setRunning(false))
+                new IntakeRunCommand(intake, true)
         );
 
+        // Left Trigger: Intake Normal
         new FunctionalButton(
                 () -> gamepadEx1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5
         ).whenHeld(
-                new InstantCommand(() -> {
-                    intake.reverseMotor(false);
-                    intake.setRunning(true);
-                })
-        ).whenReleased(
-                new InstantCommand(() -> intake.setRunning(false))
+                new IntakeRunCommand(intake, false)
         );
 
+        // X Button: Upward Servo Manual
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.X)
         ).whenHeld(
-                new InstantCommand(() -> wheel.upwardServoPosition = WheelConstants.upwardServoHigh)
-        ).whenReleased(
-                new InstantCommand(() -> wheel.upwardServoPosition = WheelConstants.upwardServoLow)
+                new WheelUpwardManualCommand(wheel)
         );
     }
 

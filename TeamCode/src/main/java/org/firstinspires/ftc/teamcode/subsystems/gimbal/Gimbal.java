@@ -37,7 +37,7 @@ public class Gimbal extends SubsystemBase {
 
         GimbalServoState(double servoPos){
             this.servoPos = servoPos;
-        }
+    }
     }
 
     public void setGimbalState(Gimbal.GimbalServoState state){

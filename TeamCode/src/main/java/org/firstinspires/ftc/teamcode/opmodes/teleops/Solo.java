@@ -14,9 +14,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
+import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.subsystems.wheel.Wheel;
+import org.firstinspires.ftc.teamcode.subsystems.wheel.WheelConstants;
 import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 
 /**
@@ -29,9 +31,10 @@ import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 @Configurable
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpAlpha")
 public class Solo extends CommandOpMode {
-    private MecanumDriveOTOS drive;
+    private MecanumDrive drive;
     private Shooter shooter;
     private Intake intake;
+    private Wheel wheel;
     private Telemetry telemetryM;
     private GamepadEx gamepadEx1;
     private boolean[] isAuto = {false};
@@ -42,20 +45,21 @@ public class Solo extends CommandOpMode {
      */
     @Override
     public void initialize() {
-        drive = new MecanumDriveOTOS(hardwareMap);
+        drive = new MecanumDrive(hardwareMap);
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
+        wheel = new Wheel(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
 
 
-        //drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1, isAuto));
+        drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1, isAuto));
 
 
-//        new FunctionalButton(
-//                () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-//        ).whenPressed(
-//                new InstantCommand(() -> drive.reset(0))
-//        );
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
+        ).whenPressed(
+                new InstantCommand(() -> drive.reset(0))
+        );
 
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.A)
@@ -71,6 +75,25 @@ public class Solo extends CommandOpMode {
                 new InstantCommand(() -> intake.setRunning(true))
         ).whenReleased(
                 new InstantCommand(() -> intake.setRunning(false))
+        );
+
+        new FunctionalButton(
+                () -> gamepadEx1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5
+        ).whenHeld(
+                new InstantCommand(() -> {
+                    intake.reverseMotor(false);
+                    intake.setRunning(true);
+                })
+        ).whenReleased(
+                new InstantCommand(() -> intake.setRunning(false))
+        );
+
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.X)
+        ).whenHeld(
+                new InstantCommand(() -> wheel.upwardServoPosition = WheelConstants.upwardServoHigh)
+        ).whenReleased(
+                new InstantCommand(() -> wheel.upwardServoPosition = WheelConstants.upwardServoLow)
         );
     }
 

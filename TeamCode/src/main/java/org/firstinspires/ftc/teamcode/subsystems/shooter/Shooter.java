@@ -76,7 +76,12 @@ public class Shooter extends SubsystemBase {
 
     /**
      * Toggles the shooter state between STOP and the given state.
-     *
+     * Note: This logic might be confusing. If the current state is ANY of the active states (SLOW or FAST),
+     * toggling with a different active state argument will stop it first?
+     * Current logic: 
+     * If arg is SLOW: toggle between STOP and SLOW.
+     * If arg is FAST: toggle between STOP and FAST.
+     * 
      * @param shooterStateE The target state to toggle to.
      */
     public void toggleShooterState(ShooterState shooterStateE) {

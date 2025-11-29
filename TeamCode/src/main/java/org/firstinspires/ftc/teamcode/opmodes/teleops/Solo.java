@@ -24,6 +24,8 @@ import com.pedropathing.paths.PathChain;
 import org.firstinspires.ftc.teamcode.commands.DriveToPoseCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.AutoPaths;
 
+import org.firstinspires.ftc.teamcode.commands.ResetPoseCommand;
+
 /**
  * Solo TeleOp OpMode
  *
@@ -40,6 +42,7 @@ public class Solo extends CommandOpMode {
     private Wheel wheel;
     private Telemetry telemetryM;
     private GamepadEx gamepadEx1;
+    private GamepadEx gamepadEx2;
 
     /**
      * Initializes the OpMode.
@@ -52,6 +55,7 @@ public class Solo extends CommandOpMode {
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
+        gamepadEx2 = new GamepadEx(gamepad2);
 
         // initialize Wheel position
         wheel.resetSlot();
@@ -64,6 +68,16 @@ public class Solo extends CommandOpMode {
                 () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
         ).whenPressed(
                 new ResetHeadingCommand(drive)
+        );
+        
+        // Emergency Pose Reset: Gamepad 2 Left Trigger + Right Trigger + Left Bumper + Right Bumper
+        new FunctionalButton(
+                () -> gamepadEx2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5 &&
+                      gamepadEx2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5 &&
+                      gamepadEx2.getButton(GamepadKeys.Button.LEFT_BUMPER) &&
+                      gamepadEx2.getButton(GamepadKeys.Button.RIGHT_BUMPER)
+        ).whenPressed(
+                new ResetPoseCommand(drive)
         );
 
         // Left Bumper: Far Shot

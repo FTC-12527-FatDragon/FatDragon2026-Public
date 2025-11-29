@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.commands.ShooterManualCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.WheelNextSlotCommand;
 import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.ShooterConstants;
@@ -38,7 +38,7 @@ import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 @Configurable
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpAlpha")
 public class Solo extends CommandOpMode {
-    private MecanumDrive drive;
+    private MecanumDriveOTOS drive;
     private Shooter shooter;
     private Intake intake;
     private Wheel wheel;
@@ -52,7 +52,7 @@ public class Solo extends CommandOpMode {
      */
     @Override
     public void initialize() {
-        drive = new MecanumDrive(hardwareMap);
+        drive = new MecanumDriveOTOS(hardwareMap);
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);

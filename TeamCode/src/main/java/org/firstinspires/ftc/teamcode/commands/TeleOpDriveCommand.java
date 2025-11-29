@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
 //import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
 
 /**
@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
  * It uses field-centric driving based on gamepad input.
  */
 public class TeleOpDriveCommand extends CommandBase {
-    private final MecanumDrive drive;
+    private final MecanumDriveOTOS drive;
     private final GamepadEx gamepadEx;
     private final boolean[] isAuto;
 
@@ -24,7 +24,7 @@ public class TeleOpDriveCommand extends CommandBase {
      * @param gamepadEx The gamepad to read input from.
      * @param isAuto    A boolean array indicating if an autonomous action is currently taking control.
      */
-    public TeleOpDriveCommand(MecanumDrive drive, GamepadEx gamepadEx, boolean[] isAuto) {
+    public TeleOpDriveCommand(MecanumDriveOTOS drive, GamepadEx gamepadEx, boolean[] isAuto) {
         this.drive = drive;
         this.gamepadEx = gamepadEx;
         this.isAuto = isAuto;

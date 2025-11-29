@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
 
 /**
  * Command to reset the robot's heading to zero.
  */
 public class ResetHeadingCommand extends InstantCommand {
-    public ResetHeadingCommand(MecanumDrive drive) {
+    public ResetHeadingCommand(MecanumDriveOTOS drive) {
         super(() -> drive.reset(0));
     }
 }

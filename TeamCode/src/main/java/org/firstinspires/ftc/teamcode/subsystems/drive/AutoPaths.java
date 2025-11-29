@@ -33,5 +33,41 @@ public class AutoPaths {
     public static final Pose FAR_SHOT_1 = new Pose(71, 50, 0);
 
     // --- Path Builders ---
-    // Add your path building methods here
+    
+    /**
+     * Path: From Blue Start 1 to Near Shot 1.
+     * A simple straight line path.
+     */
+    public static PathChain blueStartToNearShot(Follower follower) {
+        return follower.pathBuilder()
+                .addPath(new BezierLine(BLUE_START_1, NEAR_SHOT_1))
+                .setLinearHeadingInterpolation(BLUE_START_1.getHeading(), NEAR_SHOT_1.getHeading())
+                .build();
+    }
+
+    // --- Utility Methods ---
+
+    /**
+     * Calculates the angle difference between the robot's current heading and the target basket.
+     * Positive value means turn LEFT (Counter-Clockwise).
+     * Negative value means turn RIGHT (Clockwise).
+     *
+     * @param robotPose The current pose of the robot (from follower.getPose()).
+     * @param basketPose The target basket pose (e.g., BLUE_BASKET).
+     * @return The angle difference in Radians, normalized to [-PI, PI].
+     */
+    public static double getAngleToBasket(Pose robotPose, Pose basketPose) {
+        double dx = basketPose.getX() - robotPose.getX();
+        double dy = basketPose.getY() - robotPose.getY();
+        double targetHeading = Math.atan2(dy, dx);
+
+        // Calculate difference
+        double angleDiff = targetHeading - robotPose.getHeading();
+
+        // Normalize to [-PI, PI]
+        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+        while (angleDiff <= -Math.PI) angleDiff += 2 * Math.PI;
+
+        return angleDiff;
+    }
 }

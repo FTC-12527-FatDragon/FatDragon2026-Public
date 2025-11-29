@@ -18,9 +18,10 @@ public class DriveConstants {
     public static String rightFrontMotorName = "rightFrontMotor";
     public static String rightBackMotorName = "rightBackMotor";
 
-    // Odometry offsets (in mm) for Dead Wheels (DW) and OTOS
+    // Odometry offsets (in mm) for Pinpoint (Dead Wheels)
+    // If the sensor is not at the center of the robot, measure these values.
+    // Positive X is forward, Positive Y is left.
     public static double xPoseDW = 0, yPoseDW = 0;
-    public static double xPoseOTOS = 0.0, yPoseOTOS = -52.55, headingPoseOTOS = -Math.PI;
 
     // Drive behavior constants
     public static double strafingBalance = 1.1; // Multiplier to correct strafing drift
@@ -35,8 +36,4 @@ public class DriveConstants {
     public static double strafeVelocity = 26.744; // Max strafe velocity (inches/sec)
     public static double forwardAcceleration = -32.6419; // Forward acceleration (inches/sec^2)
     public static double strafeAcceleration = -95.1316; // Strafe acceleration (inches/sec^2)
-
-    // PID Coefficients for drive control
-    public static double kP_xy = 0.02; // Proportional gain for X/Y movement
-    public static double kP_h = -0.8; // Proportional gain for heading
 }

@@ -1,134 +1,67 @@
 package org.firstinspires.ftc.teamcode.subsystems.drive;
 
-import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.strafingBalance;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.utils.Units;
-import org.firstinspires.ftc.teamcode.utils.Util;
 
 @Config
 public class MecanumDrive extends SubsystemBase {
-    private final DcMotor leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor;
-    private final GoBildaPinpointDriver od;
-    private double yawOffset;
-    public static double xPose = DriveConstants.xPoseDW, yPose = DriveConstants.yPoseDW; // mm
+    public final Follower follower;
 
-    public MecanumDrive(final HardwareMap hardwareMap) {
-        leftFrontMotor = hardwareMap.get(DcMotor.class, "leftFrontMotor");
-        leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
-        rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
-        rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
-        od = hardwareMap.get(GoBildaPinpointDriver.class, "od");
-
-        leftFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        od.resetPosAndIMU();
-        od.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.FORWARD,
-                GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        od.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        od.setOffsets(Units.mmToInches(xPose), Units.mmToInches(yPose), DistanceUnit.INCH);
-
-        leftFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    public MecanumDrive(HardwareMap hardwareMap) {
+        follower = Constants.createFollower(hardwareMap);
+        
+        // Load the saved pose from Auto if available. 
+        // If PoseStorage.currentPose is (0,0,0) it might mean Auto didn't run, 
+        // but since we initialize it to (0,0,0) anyway, it's fine.
+        follower.setStartingPose(PoseStorage.currentPose);
+        
+        follower.startTeleopDrive();
     }
 
+    @Override
+    public void periodic() {
+        follower.update();
+    }
+
+    public void moveRobotFieldRelative(double forward, double strafe, double turn) {
+        // Inputs are typically from gamepad: 
+        // forward (Y stick): Up is -1
+        // strafe (X stick): Right is +1
+        // turn (RX stick): Right is +1
+        
+        // Pedro expects:
+        // xVelocity: + is Forward
+        // yVelocity: + is Left
+        // headingVelocity: + is CCW (Left)
+        
+        // Conversions:
+        // Up (-1) -> Forward (+1) => -forward
+        // Right (+1) -> Right (-1) => -strafe
+        // Right (+1) -> CW (-1) => -turn
+        
+        follower.setTeleOpDrive(-forward, -strafe, -turn, true);
+    }
+
+    public void moveRobot(double forward, double strafe, double turn) {
+        follower.setTeleOpDrive(-forward, -strafe, -turn, false);
+    }
+    
     public void reset(double heading) {
-        yawOffset = od.getHeading(AngleUnit.RADIANS) + heading;
+        Pose current = follower.getPose();
+        follower.setPose(new Pose(current.getX(), current.getY(), heading));
     }
 
-    public void moveRobotFieldRelative(double forward, double fun, double turn) {
-        od.update();
-
-        double botHeading = od.getHeading(AngleUnit.RADIANS) - yawOffset;
-        // Rotate the movement direction counter to the bot's rotation\\
-        double rotX = fun * Math.cos(-botHeading) - forward * Math.sin(-botHeading);
-        double rotY = fun * Math.sin(-botHeading) + forward * Math.cos(-botHeading);
-
-        rotX = rotX * strafingBalance; // Counteract imperfect strafing
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(turn), 1);
-        double leftFrontPower = (rotY + rotX + turn) / denominator;
-        double leftBackPower = (rotY - rotX + turn) / denominator;
-        double rightFrontPower = (rotY - rotX - turn) / denominator;
-        double rightBackPower = (rotY + rotX - turn) / denominator;
-
-        leftFrontMotor.setPower(leftFrontPower);
-        leftBackMotor.setPower(leftBackPower);
-        rightFrontMotor.setPower(rightFrontPower);
-        rightBackMotor.setPower(rightBackPower);
+    public Pose getPose() {
+        return follower.getPose();
     }
-
-    public void moveRobot(double forward, double fun, double turn) {
-        double rotX = fun * strafingBalance; // Counteract imperfect strafing
-        double rotY = forward;
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(turn), 1);
-        double leftFrontPower = (rotY + rotX + turn) / denominator;
-        double leftBackPower = (rotY - rotX + turn) / denominator;
-        double rightFrontPower = (rotY - rotX - turn) / denominator;
-        double rightBackPower = (rotY + rotX - turn) / denominator;
-
-        leftFrontMotor.setPower(leftFrontPower);
-        leftBackMotor.setPower(leftBackPower);
-        rightFrontMotor.setPower(rightFrontPower);
-        rightBackMotor.setPower(rightBackPower);
-    }
-
-    public void turnRobot(double angle, double power) {
-        double preAngle = od.getHeading(AngleUnit.RADIANS);
-        while (od.getHeading(AngleUnit.RADIANS) - preAngle < angle) {
-            leftFrontMotor.setPower(power * 0.2);
-            leftBackMotor.setPower(power * 0.2);
-            rightFrontMotor.setPower(power * -0.2);
-            rightBackMotor.setPower(power * -0.2);
-        }
-    }
-
-    public void turnRobotTo(double angle, double power) {
-        double heading = od.getHeading(AngleUnit.RADIANS);
-        double needs = (angle - heading) % (2 * Math.PI);
-        if(0 <= needs && needs <= Math.PI || needs <= -Math.PI) {
-            while (Util.epsilonEqual(angle, od.getHeading(AngleUnit.RADIANS), 0.02)) {
-                leftFrontMotor.setPower(power * 0.2);
-                leftBackMotor.setPower(power * 0.2);
-                rightFrontMotor.setPower(power * -0.2);
-                rightBackMotor.setPower(power * -0.2);
-            }
-        }
-    }
-
-    public Pose2D getPose() {
-        return od.getPosition();
-    }
-
-    public double getYawOffset() {return yawOffset;}
-
-    public boolean isHeadingAtSetPoint(double headingSetPoint) {
-        return Util.epsilonEqual(od.getHeading(AngleUnit.RADIANS), headingSetPoint,
-                DriveConstants.headingEpsilon);
-    }
-
-    public void stop() {
-        moveRobot(0, 0, 0);
+    
+    public double getYawOffset() {
+        // Not strictly tracked separately anymore, but we can imply it 
+        // if we want to maintain API compatibility. 
+        // But for now, just return 0 or current heading.
+        return 0;
     }
 }
-

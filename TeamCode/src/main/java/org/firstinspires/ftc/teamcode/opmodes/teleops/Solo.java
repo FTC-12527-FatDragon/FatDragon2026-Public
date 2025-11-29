@@ -19,14 +19,10 @@ import org.firstinspires.ftc.teamcode.commands.ResetHeadingCommand;
 import org.firstinspires.ftc.teamcode.commands.ShooterManualCommand;
 import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.WheelNextSlotCommand;
-import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
-import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
-import org.firstinspires.ftc.teamcode.subsystems.shooter.ShooterConstants;
-import org.firstinspires.ftc.teamcode.subsystems.wheel.Wheel;
-import org.firstinspires.ftc.teamcode.subsystems.wheel.WheelConstants;
-import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
+import org.firstinspires.ftc.teamcode.commands.DriveToPoseCommand;
+import org.firstinspires.ftc.teamcode.subsystems.drive.AutoPaths;
 
 /**
  * Solo TeleOp OpMode
@@ -38,13 +34,12 @@ import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
 @Configurable
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpAlpha")
 public class Solo extends CommandOpMode {
-    private MecanumDriveOTOS drive;
+    private MecanumDrive drive;
     private Shooter shooter;
     private Intake intake;
     private Wheel wheel;
     private Telemetry telemetryM;
     private GamepadEx gamepadEx1;
-    private boolean[] isAuto = {false};
 
     /**
      * Initializes the OpMode.
@@ -52,7 +47,7 @@ public class Solo extends CommandOpMode {
      */
     @Override
     public void initialize() {
-        drive = new MecanumDriveOTOS(hardwareMap);
+        drive = new MecanumDrive(hardwareMap);
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);
@@ -62,7 +57,7 @@ public class Solo extends CommandOpMode {
         wheel.resetSlot();
         wheel.setUpwardServoPosition(WheelConstants.upwardServoLow);
 
-        drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1, isAuto));
+        drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1));
 
 
         new FunctionalButton(
@@ -119,6 +114,20 @@ public class Solo extends CommandOpMode {
         ).whenHeld(
                 new WheelUpwardManualCommand(wheel)
         );
+        
+        // Gimbal Servo Manual Control (Test)
+        if (gamepadEx1.getButton(GamepadKeys.Button.DPAD_LEFT)) {
+            wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
+        } else if (gamepadEx1.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
+            wheel.setCustomWheelPos(wheel.customWheelPos - 0.001);
+        }
+
+        // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
+        ).whenPressed(
+                new DriveToPoseCommand(drive, AutoPaths.NEAR_SHOT_1)
+        );
     }
 
     /**
@@ -129,15 +138,19 @@ public class Solo extends CommandOpMode {
     public void run() {
         telemetryM = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
+        // Gimbal Servo Manual Control (Test) - Moved to run loop for continuous update
+        if (gamepad1.dpad_left) {
+            wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
+        } else if (gamepad1.dpad_right) {
+            wheel.setCustomWheelPos(wheel.customWheelPos - 0.001);
+        }
 
         CommandScheduler.getInstance().run();
 
-        telemetry.addData("X", drive.getPose().getX(DistanceUnit.MM));
-        telemetry.addData("Y", drive.getPose().getY(DistanceUnit.MM));
-        telemetry.addData("Heading", drive.getPose().getHeading(AngleUnit.RADIANS));
-        telemetry.addData("YawOffset", drive.getYawOffset());
+        telemetry.addData("X (Inches)", drive.getPose().getX());
+        telemetry.addData("Y (Inches)", drive.getPose().getY());
+        telemetry.addData("Heading (Radians)", drive.getPose().getHeading());
+        telemetry.addData("Wheel Position", wheel.customWheelPos);
         telemetry.update();
-
-
     }
 }

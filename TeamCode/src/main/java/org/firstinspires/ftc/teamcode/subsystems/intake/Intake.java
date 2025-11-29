@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Intake extends SubsystemBase {
     public final DcMotor intakeMotor;
 
-    public static boolean isRunning, motorReversed;
+    public boolean isRunning, motorReversed;
 
     /**
      * Constructor for Intake.

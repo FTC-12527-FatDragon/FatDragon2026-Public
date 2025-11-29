@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.wheel.Wheel;
 
+import org.firstinspires.ftc.teamcode.subsystems.drive.PoseStorage;
+
 /**
  * Base class for all autonomous OpModes.
  * Handles initialization of subsystems and the CommandScheduler loop.
@@ -78,6 +80,8 @@ public abstract class AutoCommandBase extends LinearOpMode {
             telemetryM.update();
         }
 
+        // Save the final pose to storage for TeleOp
+        PoseStorage.currentPose = follower.getPose();
         CommandScheduler.getInstance().reset();
     }
 }

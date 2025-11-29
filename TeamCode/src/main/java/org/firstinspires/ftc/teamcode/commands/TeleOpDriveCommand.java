@@ -3,8 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
-//import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
+import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
 
 /**
  * TeleOpDriveCommand
@@ -13,32 +12,27 @@ import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDriveOTOS;
  * It uses field-centric driving based on gamepad input.
  */
 public class TeleOpDriveCommand extends CommandBase {
-    private final MecanumDriveOTOS drive;
+    private final MecanumDrive drive;
     private final GamepadEx gamepadEx;
-    private final boolean[] isAuto;
 
     /**
      * Constructor for TeleOpDriveCommand.
      *
      * @param drive     The drive subsystem.
      * @param gamepadEx The gamepad to read input from.
-     * @param isAuto    A boolean array indicating if an autonomous action is currently taking control.
      */
-    public TeleOpDriveCommand(MecanumDriveOTOS drive, GamepadEx gamepadEx, boolean[] isAuto) {
+    public TeleOpDriveCommand(MecanumDrive drive, GamepadEx gamepadEx) {
         this.drive = drive;
         this.gamepadEx = gamepadEx;
-        this.isAuto = isAuto;
         addRequirements(drive);
     }
 
     /**
      * The main loop of the command.
-     * Reads gamepad input and moves the robot field-centrically if not in auto mode.
+     * Reads gamepad input and moves the robot field-centrically.
      */
     @Override
     public void execute() {
-        if (!isAuto[0]) {
-            drive.moveRobotFieldRelative(gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX());
-        }
+        drive.moveRobotFieldRelative(gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX());
     }
 }

@@ -7,11 +7,12 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
-//import com.pedropathing.localization.constants.PinpointConstants;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.pedropathing.ftc.localization.constants.OTOSConstants;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
@@ -41,6 +42,15 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(DriveConstants.forwardVelocity)
             .yVelocity(DriveConstants.strafeVelocity);
+
+    public static OTOSConstants otosConstants = new OTOSConstants()
+            .hardwareMapName("otos")
+            .linearUnit(DistanceUnit.INCH)
+            .angleUnit(AngleUnit.RADIANS)
+            .offset(new SparkFunOTOS.Pose2D(DriveConstants.xPoseOTOS,
+                    DriveConstants.yPoseOTOS, DriveConstants.headingPoseOTOS))
+            .linearScalar(DriveConstants.linearScalar)
+            .angularScalar(DriveConstants.angularScalar);
 
 //    public static PinpointConstants localizerConstants = new PinpointConstants()
 //            .forwardPodY(0)
@@ -73,6 +83,7 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .mecanumDrivetrain(driveConstants)
+                .OTOSLocalizer(otosConstants)
 //                .pinpointLocalizer(localizerConstants)
 //                .pathConstraints(pathConstraints)
                 .build();

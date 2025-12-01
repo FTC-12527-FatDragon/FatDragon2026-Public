@@ -5,89 +5,95 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commands.IntakeRunCommand;
 import org.firstinspires.ftc.teamcode.commands.LaunchSingleCommand;
-import org.firstinspires.ftc.teamcode.commands.ResetHeadingCommand;
 import org.firstinspires.ftc.teamcode.commands.ShooterManualCommand;
-import org.firstinspires.ftc.teamcode.commands.TeleOpDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.WheelNextSlotCommand;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
-import org.firstinspires.ftc.teamcode.commands.DriveToPoseCommand;
-import org.firstinspires.ftc.teamcode.subsystems.drive.AutoPaths;
-import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
+import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.ShooterConstants;
 import org.firstinspires.ftc.teamcode.subsystems.wheel.Wheel;
 import org.firstinspires.ftc.teamcode.subsystems.wheel.WheelConstants;
 import org.firstinspires.ftc.teamcode.utils.FunctionalButton;
-import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
-
-import org.firstinspires.ftc.teamcode.commands.ResetPoseCommand;
 
 /**
- * Solo TeleOp OpMode
- *
- * This OpMode controls the robot during the driver-controlled period.
- * It initializes the drive subsystem and maps gamepad inputs to robot actions.
+ * SoloRobotCentric TeleOp OpMode
+ * 
+ * A simplified "Headed" (Robot-Centric) TeleOp that does NOT use Odometry (Pinpoint/OTOS).
+ * Use this as a fallback if the localization sensor fails.
  */
 @Config
-@Configurable
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpAlpha")
-public class Solo extends CommandOpMode {
-    private MecanumDrive drive;
+@TeleOp(name = "Solo-RobotCentric-NoOD", group = "Fallback")
+public class SoloRobotCentric extends CommandOpMode {
+
+    // Direct Motor Access (No MecanumDrive Subsystem to avoid Follower/OD dependency)
+    private DcMotor leftFront, leftRear, rightFront, rightRear;
+
     private Shooter shooter;
     private Intake intake;
     private Wheel wheel;
-    private Telemetry telemetryM;
+    private MultipleTelemetry telemetryM;
     private GamepadEx gamepadEx1;
-    private GamepadEx gamepadEx2;
 
-    /**
-     * Initializes the OpMode.
-     * Sets up the hardware, gamepads, and commands.
-     */
     @Override
     public void initialize() {
-        drive = new MecanumDrive(hardwareMap);
+        // --- Initialize Drive Motors Directly ---
+        leftFront = hardwareMap.get(DcMotor.class, DriveConstants.leftFrontMotorName);
+        leftRear = hardwareMap.get(DcMotor.class, DriveConstants.leftBackMotorName);
+        rightFront = hardwareMap.get(DcMotor.class, DriveConstants.rightFrontMotorName);
+        rightRear = hardwareMap.get(DcMotor.class, DriveConstants.rightBackMotorName);
+
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // --- Initialize Subsystems ---
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
-        gamepadEx2 = new GamepadEx(gamepad2);
 
-        // initialize Wheel position
+        // --- Initialize Subsystem States ---
         wheel.resetSlot();
         wheel.setUpwardServoPosition(WheelConstants.upwardServoLow);
 
-        drive.setDefaultCommand(new TeleOpDriveCommand(drive, gamepadEx1));
+        // --- Drive Control (Robot Centric) ---
+        // Using a RunCommand that runs every loop to set motor powers
+        schedule(new RunCommand(() -> {
+            double y = -gamepad1.left_stick_y; // Remember, this is reversed!
+            double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+            double rx = gamepad1.right_stick_x;
 
+            // Robot Centric Math
+            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+            double frontLeftPower = (y + x + rx) / denominator;
+            double backLeftPower = (y - x + rx) / denominator;
+            double frontRightPower = (y - x - rx) / denominator;
+            double backRightPower = (y + x - rx) / denominator;
 
-        new FunctionalButton(
-                () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-        ).whenPressed(
-                new ResetHeadingCommand(drive)
-        );
+            leftFront.setPower(frontLeftPower);
+            leftRear.setPower(backLeftPower);
+            rightFront.setPower(frontRightPower);
+            rightRear.setPower(backRightPower);
+        }));
+
+        // --- Controls (Copied from Solo.java) ---
         
-        // Emergency Pose Reset: Gamepad 2 Left Trigger + Right Trigger + Left Bumper + Right Bumper
-        new FunctionalButton(
-                () -> gamepadEx2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5 &&
-                      gamepadEx2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5 &&
-                      gamepadEx2.getButton(GamepadKeys.Button.LEFT_BUMPER) &&
-                      gamepadEx2.getButton(GamepadKeys.Button.RIGHT_BUMPER)
-        ).whenPressed(
-                new ResetPoseCommand(drive)
-        );
-
         // Left Bumper: Far Shot
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.LEFT_BUMPER)
@@ -130,37 +136,21 @@ public class Solo extends CommandOpMode {
                 new IntakeRunCommand(intake, false)
         );
 
-        // X Button: Upward Servo Manual - REPLACED: Now X is Next Slot
+        // X Button: Upward Servo Manual
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.X)
         ).whenPressed(
                 new WheelNextSlotCommand(wheel)
         );
         
-        // Gimbal Servo Manual Control (Test)
-        if (gamepadEx1.getButton(GamepadKeys.Button.DPAD_LEFT)) {
-            wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
-        } else if (gamepadEx1.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
-            wheel.setCustomWheelPos(wheel.customWheelPos - 0.001);
-        }
-
-        // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
-        new FunctionalButton(
-                () -> gamepadEx1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-        ).whenPressed(
-                new DriveToPoseCommand(drive, AutoPaths.NEAR_SHOT_1)
-        );
+        // Note: ResetHeading and DriveToPose are removed because they require OD.
     }
 
-    /**
-     * The main loop of the OpMode.
-     * Runs the command scheduler and updates telemetry.
-     */
     @Override
     public void run() {
         telemetryM = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        // Gimbal Servo Manual Control (Test) - Moved to run loop for continuous update
+        // Gimbal Servo Manual Control
         if (gamepad1.dpad_left) {
             wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
         } else if (gamepad1.dpad_right) {
@@ -169,10 +159,9 @@ public class Solo extends CommandOpMode {
 
         CommandScheduler.getInstance().run();
 
-        telemetry.addData("X (Inches)", drive.getPose().getX());
-        telemetry.addData("Y (Inches)", drive.getPose().getY());
-        telemetry.addData("Heading (Radians)", drive.getPose().getHeading());
+        telemetry.addData("Mode", "Robot Centric (No OD)");
         telemetry.addData("Wheel Position", wheel.customWheelPos);
         telemetry.update();
     }
 }
+

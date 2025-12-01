@@ -10,6 +10,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.commands.IntakeRunCommand;
 import org.firstinspires.ftc.teamcode.commands.autocommands.AutoDriveCommand;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 
@@ -41,6 +42,9 @@ public class AutoTemplate extends AutoCommandBase {
                 
                 // Wait for 1 second
                 new WaitCommand(1000),
+
+                // Example: Run Intake for 2 seconds
+                new IntakeRunCommand(intake, false).withTimeout(2000),
                 
                 // Drive Path 2
                 new AutoDriveCommand(follower, path2),

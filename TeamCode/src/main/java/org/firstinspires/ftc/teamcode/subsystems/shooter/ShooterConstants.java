@@ -9,8 +9,8 @@ import com.acmerobotics.dashboard.config.Config;
  */
 @Config
 public class ShooterConstants {
-    public static String upShooterName = "upShooterMotor";
-    public static String downShooterName = "downShooterMotor";
+    public static String upShooterName = "downShooterMotor"; // Swapped
+    public static String downShooterName = "upShooterMotor"; // Swapped
 
     public static double shooterEpsilon = 50; // Tolerance for velocity check
 

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
  * TeleOpDriveCommand
  *
  * This command handles the driving of the robot during the TeleOp period.
- * It uses field-centric driving based on gamepad input.
+ * It uses field-centric driving based on gamepad input with non-linear (exponential) mapping.
  */
 public class TeleOpDriveCommand extends CommandBase {
     private final MecanumDrive drive;
@@ -33,6 +33,21 @@ public class TeleOpDriveCommand extends CommandBase {
      */
     @Override
     public void execute() {
-            drive.moveRobotFieldRelative(gamepadEx.getLeftY(), gamepadEx.getLeftX(), gamepadEx.getRightX());
+        // Apply non-linear mapping for better control at low speeds
+        double forward = cubicScale(gamepadEx.getLeftY());
+        double strafe = cubicScale(gamepadEx.getLeftX());
+        double turn = cubicScale(gamepadEx.getRightX());
+
+        drive.moveRobotFieldRelative(forward, strafe, turn);
+    }
+    
+    /**
+     * Scales the input using a cubic function (x^3) to preserve sign and allow fine control.
+     * 
+     * @param input The raw gamepad input (-1.0 to 1.0).
+     * @return The scaled output.
+     */
+    private double cubicScale(double input) {
+        return Math.pow(input, 3);
     }
 }

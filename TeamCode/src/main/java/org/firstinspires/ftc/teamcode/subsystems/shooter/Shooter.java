@@ -132,8 +132,18 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         if (shooterState != ShooterState.OPENLOOP) {
             if (shooterState != ShooterState.STOP) {
-                double powerUp = pidControllerUp.calculate(shooterUp.getLibVelocity(), shooterState.shooterVelocity);
-                double powerDown = pidControllerDown.calculate(shooterDown.getLibVelocity(), shooterState.shooterVelocity);
+                double targetVel = shooterState.shooterVelocity;
+                
+                // PID Calculation
+                double pidUp = pidControllerUp.calculate(shooterUp.getLibVelocity(), targetVel);
+                double pidDown = pidControllerDown.calculate(shooterDown.getLibVelocity(), targetVel);
+                
+                // Feedforward Calculation: FF = kV * targetVel + kS * sign(targetVel)
+                double ff = (targetVel * ShooterConstants.kV) + (Math.signum(targetVel) * ShooterConstants.kS);
+                
+                // Total Power
+                double powerUp = pidUp + ff;
+                double powerDown = pidDown + ff;
                 
                 shooterUp.setPower(powerUp);
                 shooterDown.setPower(powerDown);

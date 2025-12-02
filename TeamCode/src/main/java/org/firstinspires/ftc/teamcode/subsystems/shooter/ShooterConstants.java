@@ -15,9 +15,13 @@ public class ShooterConstants {
     public static double shooterEpsilon = 50; // Tolerance for velocity check
 
     // PID Coefficients
-    public static double kP = 1;
+    public static double kP = 0.0005; // Tuned value suggestion
     public static double kI = 0;
-    public static double kD = 0;
+    public static double kD = 0.0002; // Tuned value suggestion
+    
+    // Feedforward Coefficients
+    public static double kV = 0.0005; // Velocity gain: Power / MaxVelocity (approx)
+    public static double kS = 0.0;    // Static friction compensation
     
     public static double stopPower = 0;
     

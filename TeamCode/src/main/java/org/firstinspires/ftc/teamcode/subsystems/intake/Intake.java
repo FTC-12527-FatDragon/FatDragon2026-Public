@@ -1,22 +1,23 @@
 package org.firstinspires.ftc.teamcode.subsystems.intake;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
-//import org.firstinspires.ftc.teamcode.subsystems.transit.TransitConstants;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /**
  * Intake Subsystem
  *
  * This subsystem controls the intake mechanism, which brings game elements into the robot.
  * It consists of a motor that can be toggled on/off and reversed.
+ * Includes current monitoring to detect stalls.
  */
 public class Intake extends SubsystemBase {
-    public final DcMotor intakeMotor;
+    public final DcMotorEx intakeMotor;
 
     public boolean isRunning, motorReversed;
 
@@ -27,11 +28,8 @@ public class Intake extends SubsystemBase {
      * @param hardwareMap The hardware map to get the motor.
      */
     public Intake(HardwareMap hardwareMap) {
-        intakeMotor = hardwareMap.get(DcMotor.class, IntakeConstants.intakeMotorName);
-
-
+        intakeMotor = hardwareMap.get(DcMotorEx.class, IntakeConstants.intakeMotorName);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
         isRunning = false;
     }
 
@@ -66,6 +64,14 @@ public class Intake extends SubsystemBase {
     public boolean isRunning() {
         return isRunning;
     }
+    
+    /**
+     * Gets the current draw of the intake motor.
+     * @return Current in Amps.
+     */
+    public double getCurrent() {
+        return intakeMotor.getCurrent(CurrentUnit.AMPS);
+    }
 
     /**
      * Periodic method called by the CommandScheduler.
@@ -79,13 +85,19 @@ public class Intake extends SubsystemBase {
             } else {
                 intakeMotor.setPower(IntakeConstants.intakePower);
             }
+            
+            // Check for stall
+            double current = getCurrent();
+            if (current > IntakeConstants.stallCurrentThreshold) {
+                TelemetryPacket packet = new TelemetryPacket();
+                packet.put("WARNING", "INTAKE STALL DETECTED!");
+                packet.put("Intake Current", current);
+                FtcDashboard.getInstance().sendTelemetryPacket(packet);
+            }
 
         }
         else {
             intakeMotor.setPower(0);
-
         }
-
-
     }
 }

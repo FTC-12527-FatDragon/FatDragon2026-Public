@@ -19,7 +19,7 @@ public class Wheel extends SubsystemBase {
     public double customWheelPos = WheelConstants.posIDLE;
 
     public WheelServoState wheelState = WheelServoState.IDLE;
-    
+
     public int currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
 
 
@@ -76,7 +76,7 @@ public class Wheel extends SubsystemBase {
     public void toggleUpwardServo() {
         upwardServoPosition = upwardServoPosition == 0.5? 1: 0.5;
     }
-    
+
     public void nextSlot() {
         currentSlotIndex++;
         if (currentSlotIndex >= WheelConstants.WHEEL_SLOTS.length) {

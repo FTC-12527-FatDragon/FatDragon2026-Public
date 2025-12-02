@@ -164,11 +164,11 @@ public class Solo extends CommandOpMode {
         );
 
         // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
-        new FunctionalButton(
-                () -> gamepadEx1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-        ).whenPressed(
-                new DriveToPoseCommand(drive, AutoPaths.NEAR_SHOT_1)
-        );
+//        new FunctionalButton(
+//                () -> gamepadEx1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
+//        ).whenPressed(
+//                new DriveToPoseCommand(drive, AutoPaths.NEAR_SHOT_1)
+//        );
     }
 
     /**

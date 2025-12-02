@@ -24,6 +24,7 @@ import com.pedropathing.paths.PathChain;
 import org.firstinspires.ftc.teamcode.commands.DriveToPoseCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.AutoPaths;
 import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.gimbal.Gimbal;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.ShooterConstants;
@@ -48,6 +49,7 @@ public class Solo extends CommandOpMode {
     private Shooter shooter;
     private Intake intake;
     private Wheel wheel;
+    private Gimbal gimbal;
     private Telemetry telemetryM;
     private GamepadEx gamepadEx1;
     private GamepadEx gamepadEx2;
@@ -62,6 +64,7 @@ public class Solo extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);
+        gimbal = new Gimbal(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
         gamepadEx2 = new GamepadEx(gamepad2);
 
@@ -138,11 +141,7 @@ public class Solo extends CommandOpMode {
         );
         
         // Gimbal Servo Manual Control (Test)
-        if (gamepadEx1.getButton(GamepadKeys.Button.DPAD_LEFT)) {
-            wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
-        } else if (gamepadEx1.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
-            wheel.setCustomWheelPos(wheel.customWheelPos - 0.001);
-        }
+        // Moved to run loop for continuous update
 
         // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
         new FunctionalButton(
@@ -162,9 +161,11 @@ public class Solo extends CommandOpMode {
 
         // Gimbal Servo Manual Control (Test) - Moved to run loop for continuous update
         if (gamepad1.dpad_left) {
-            wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
+            Gimbal.gimbalServoPosition += 0.001;
+            gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
         } else if (gamepad1.dpad_right) {
-            wheel.setCustomWheelPos(wheel.customWheelPos - 0.001);
+            Gimbal.gimbalServoPosition -= 0.001;
+            gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
         }
 
         CommandScheduler.getInstance().run();
@@ -173,6 +174,7 @@ public class Solo extends CommandOpMode {
         telemetry.addData("Y (Inches)", drive.getPose().getY());
         telemetry.addData("Heading (Radians)", drive.getPose().getHeading());
         telemetry.addData("Wheel Position", wheel.customWheelPos);
+        telemetry.addData("Gimbal Position", Gimbal.gimbalServoPosition);
         telemetry.update();
     }
 }

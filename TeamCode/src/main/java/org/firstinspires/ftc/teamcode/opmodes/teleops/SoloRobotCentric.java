@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.commands.ShooterManualCommand;
 import org.firstinspires.ftc.teamcode.commands.WheelNextSlotCommand;
 import org.firstinspires.ftc.teamcode.commands.WheelUpwardManualCommand;
 import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants;
+import org.firstinspires.ftc.teamcode.subsystems.gimbal.Gimbal;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.ShooterConstants;
@@ -41,6 +42,7 @@ public class SoloRobotCentric extends CommandOpMode {
     private Shooter shooter;
     private Intake intake;
     private Wheel wheel;
+    private Gimbal gimbal;
     private MultipleTelemetry telemetryM;
     private GamepadEx gamepadEx1;
 
@@ -66,6 +68,7 @@ public class SoloRobotCentric extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);
+        gimbal = new Gimbal(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
 
         // --- Initialize Subsystem States ---
@@ -152,15 +155,18 @@ public class SoloRobotCentric extends CommandOpMode {
 
         // Gimbal Servo Manual Control
         if (gamepad1.dpad_left) {
-            wheel.setCustomWheelPos(wheel.customWheelPos + 0.001);
+            Gimbal.gimbalServoPosition += 0.001;
+            gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
         } else if (gamepad1.dpad_right) {
-            wheel.setCustomWheelPos(wheel.customWheelPos - 0.001);
+            Gimbal.gimbalServoPosition -= 0.001;
+            gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
         }
 
         CommandScheduler.getInstance().run();
 
         telemetry.addData("Mode", "Robot Centric (No OD)");
         telemetry.addData("Wheel Position", wheel.customWheelPos);
+        telemetry.addData("Gimbal Position", Gimbal.gimbalServoPosition);
         telemetry.update();
     }
 }

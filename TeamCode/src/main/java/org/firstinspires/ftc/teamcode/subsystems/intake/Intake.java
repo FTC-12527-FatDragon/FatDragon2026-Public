@@ -64,7 +64,7 @@ public class Intake extends SubsystemBase {
     public boolean isRunning() {
         return isRunning;
     }
-    
+
     /**
      * Gets the current draw of the intake motor.
      * @return Current in Amps.

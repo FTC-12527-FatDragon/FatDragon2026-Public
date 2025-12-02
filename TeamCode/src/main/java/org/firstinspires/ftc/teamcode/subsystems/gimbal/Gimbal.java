@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Gimbal extends SubsystemBase {
 
     public final Servo gimbalServo;
+    // Initialize with the Constant value
     public static double gimbalServoPosition = GimbalConstants.posIDLE;
 
     public GimbalServoState gimbalState = GimbalServoState.IDLE;

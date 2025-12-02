@@ -112,13 +112,6 @@ public class Solo extends CommandOpMode {
                 new LaunchSingleCommand(wheel)
         );
 
-        // D-Pad Down: Next Slot - REPLACED BY X BUTTON
-//        new FunctionalButton(
-//                () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_DOWN)
-//        ).whenPressed(
-//                new WheelNextSlotCommand(wheel)
-//        );
-
         // B Button: Intake Reverse
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.B)
@@ -133,15 +126,42 @@ public class Solo extends CommandOpMode {
                 new IntakeRunCommand(intake, false)
         );
 
-        // X Button: Upward Servo Manual - REPLACED: Now X is Next Slot
+        // X Button: Next Slot
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.X)
         ).whenPressed(
                 new WheelNextSlotCommand(wheel)
         );
         
-        // Gimbal Servo Manual Control (Test)
-        // Moved to run loop for continuous update
+        // --- Gimbal Controls ---
+        
+        // D-Pad Down: Auto Aim (While Held)
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_DOWN)
+        ).whileHeld(
+                new org.firstinspires.ftc.teamcode.commands.GimbalAutoAimCommand(gimbal, drive)
+        );
+
+        // D-Pad Up: Reset to Center (When Pressed)
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_UP)
+        ).whenPressed(
+                new org.firstinspires.ftc.teamcode.commands.GimbalResetCommand(gimbal)
+        );
+
+        // D-Pad Left: Manual Turn Left (While Held)
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_LEFT)
+        ).whileHeld(
+                new org.firstinspires.ftc.teamcode.commands.GimbalManualControlCommand(gimbal, 0.001)
+        );
+
+        // D-Pad Right: Manual Turn Right (While Held)
+        new FunctionalButton(
+                () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_RIGHT)
+        ).whileHeld(
+                new org.firstinspires.ftc.teamcode.commands.GimbalManualControlCommand(gimbal, -0.001)
+        );
 
         // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
         new FunctionalButton(
@@ -158,15 +178,6 @@ public class Solo extends CommandOpMode {
     @Override
     public void run() {
         telemetryM = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
-        // Gimbal Servo Manual Control (Test) - Moved to run loop for continuous update
-        if (gamepad1.dpad_left) {
-            Gimbal.gimbalServoPosition += 0.001;
-            gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
-        } else if (gamepad1.dpad_right) {
-            Gimbal.gimbalServoPosition -= 0.001;
-            gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
-        }
 
         CommandScheduler.getInstance().run();
 

@@ -12,7 +12,7 @@ public class GimbalConstants {
     public static String gimbalServoName = "gimbalServo";
 
     // Servo positions
-    public static double posIDLE = 0;
+    public static double posIDLE = 0.5; // Center/Forward position
     public static double posDeg90 = 0;
     public static double posDeg180 = 0;
 

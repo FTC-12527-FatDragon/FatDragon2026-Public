@@ -74,7 +74,7 @@ public class Wheel extends SubsystemBase {
      * Toggles the upward servo position between two preset values.
      */
     public void toggleUpwardServo() {
-        upwardServoPosition = upwardServoPosition == 0.5? 1: 0.5;
+        upwardServoPosition = upwardServoPosition == WheelConstants.upwardServoLow ? WheelConstants.upwardServoHigh : WheelConstants.upwardServoLow;
     }
 
     public void nextSlot() {

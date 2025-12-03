@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.utils.DcMotorRe;
 
@@ -22,13 +23,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-class PID {
-    public double kP, kI, kD;
+class PIDF {
+    public double kP, kI, kD, f, kV, kA, kS;
 
-    PID(int kP, int kI, int kD) {
+    PIDF(double kP, double kI, double kD, double f, double kV, double kA, double kS) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
+        this.f = f;
+        this.kV = kV;
+        this.kA = kA;
+        this.kS = kS;
     }
 }
 
@@ -39,16 +44,19 @@ public class DashTuner extends LinearOpMode {
     public static String[] servoName = {"", "", "", ""};
     public static boolean[] closeLoop = new boolean[4];
     public static double[] motorTarget = new double[4];
+    // To calculate acceleration for kA
+    private double[] lastMotorTarget = new double[4]; 
+    
     public static double[] servoTarget = new double[4];
     public static double[] slaveTo = {-1, -1, -1, -1};
 
     public static boolean[] isVelocityCloseLoop = new boolean[4];
 
-    public static PID[] PIDs = {
-            new PID(0, 0, 0),
-            new PID(0, 0, 0),
-            new PID(0, 0, 0),
-            new PID(0, 0, 0)
+    public static PIDF[] PIDs = {
+            new PIDF(0, 0, 0, 0, 0, 0, 0),
+            new PIDF(0, 0, 0, 0, 0, 0, 0),
+            new PIDF(0, 0, 0, 0, 0, 0, 0),
+            new PIDF(0, 0, 0, 0, 0, 0, 0)
     };
 
     DcMotorRe[] motors = new DcMotorRe[4];
@@ -117,12 +125,23 @@ public class DashTuner extends LinearOpMode {
                         pidControllers[i].setPID(PIDs[i].kP, PIDs[i].kI, PIDs[i].kD);
 
                         double v = motors[i].getInstantVelocity();
-                        motors[i].setPower(pidControllers[i].calculate(v, motorTarget[i]));
+                        double target = motorTarget[i];
+                        
+                        // Calculate acceleration (change in target velocity / time)
+                        // Loop time approx 20ms (0.02s)
+                        double targetAccel = (target - lastMotorTarget[i]) / 0.02;
+                        lastMotorTarget[i] = target;
+
+                        double ff = (target * PIDs[i].kV) + (targetAccel * PIDs[i].kA) + (Math.signum(target) * PIDs[i].kS) + PIDs[i].f;
+
+                        motors[i].setPower(pidControllers[i].calculate(v, target) + ff);
 
                         TelemetryPacket packet = new TelemetryPacket();
-                        packet.put("targetVelocity " + i, motorTarget[i]);
+                        packet.put("targetVelocity " + i, target);
                         packet.put("libVelocity " + i, motors[i].getLibVelocity());
                         packet.put("InstantVelocity" + i, v);
+                        packet.put("Error " + i, target - v);
+                        packet.put("Current (Amps) " + i, motors[i].getCurrent(CurrentUnit.AMPS));
 
                         dashboard.sendTelemetryPacket(packet);
                     }
@@ -130,11 +149,16 @@ public class DashTuner extends LinearOpMode {
                         pidControllers[i].setPID(PIDs[i].kP, PIDs[i].kI, PIDs[i].kD);
 
                         double pos = motors[i].getPosition();
-                        motors[i].setPower(pidControllers[i].calculate(pos, motorTarget[i]));
+                        double target = motorTarget[i];
+                        double ff = PIDs[i].f; // Only use constant feedforward (e.g. gravity)
+
+                        motors[i].setPower(pidControllers[i].calculate(pos, target) + ff);
 
                         TelemetryPacket packet = new TelemetryPacket();
-                        packet.put("targetPosition " + i, motorTarget[i]);
+                        packet.put("targetPosition " + i, target);
                         packet.put("currentPosition " + i, pos);
+                        packet.put("Error " + i, target - pos);
+                        packet.put("Current (Amps) " + i, motors[i].getCurrent(CurrentUnit.AMPS));
 
                         dashboard.sendTelemetryPacket(packet);
                     }
@@ -145,6 +169,7 @@ public class DashTuner extends LinearOpMode {
                         TelemetryPacket packet = new TelemetryPacket();
                         packet.put("currentVelocity " + i, v);
                         packet.put("LibVelocity " + i, motors[i].getLibVelocity());
+                        packet.put("Current (Amps) " + i, motors[i].getCurrent(CurrentUnit.AMPS));
 
                         dashboard.sendTelemetryPacket(packet);
                     }

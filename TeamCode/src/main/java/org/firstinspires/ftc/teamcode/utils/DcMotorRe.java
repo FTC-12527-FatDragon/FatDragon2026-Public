@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -19,9 +20,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
  */
 public class DcMotorRe {
     private final DcMotorEx motor;
-    private double lastPos = 0;
     private final double WINDOW = 10;
-    private final Deque<Double> posList = new ArrayDeque<>();
+    // Stores historical velocities for averaging
+    private final Deque<Double> velocityList = new ArrayDeque<>();
 
     /**
      * Constructor for DcMotorRe.
@@ -54,25 +55,28 @@ public class DcMotorRe {
     }
 
     /**
-     * Calculates the instantaneous velocity based on the difference between the current
-     * and last recorded position. Assumes a loop time of 20ms (0.02s).
+     * Gets the velocity directly from the motor controller (built-in method).
+     * This is more accurate than calculating it manually in Java due to loop timing jitter.
      *
-     * @return Instantaneous velocity in ticks per second.
+     * @return Velocity in ticks per second.
      */
     public double getInstantVelocity() {
-        return (motor.getCurrentPosition() - lastPos) / 0.02;
+        return motor.getVelocity();
     }
 
     /**
-     * Calculates the average velocity over the sliding window of recorded positions.
-     * Assumes a loop time of 20ms (0.02s).
+     * Calculates the average velocity over the sliding window.
      *
      * @return Average velocity in ticks per second.
      */
     public double getAverageVelocity() {
-        if (posList.peekFirst() != null && posList.peekLast() != null)
-            return (posList.peekLast() - posList.peekFirst()) / (WINDOW * 0.02);
-        return 0;
+        if (velocityList.isEmpty()) return 0;
+        
+        double sum = 0;
+        for (double v : velocityList) {
+            sum += v;
+        }
+        return sum / velocityList.size();
     }
 
     /**
@@ -94,14 +98,23 @@ public class DcMotorRe {
     }
 
     /**
-     * Updates the last recorded position and the sliding window of positions.
+     * Gets the current draw of the motor.
+     *
+     * @param unit The unit of current (e.g. AMPS, MILLIAMPS).
+     * @return Current in the specified unit.
+     */
+    public double getCurrent(CurrentUnit unit) {
+        return motor.getCurrent(unit);
+    }
+
+    /**
+     * Updates the sliding window of velocities.
      * This should be called once per loop cycle.
      */
     public void updateLastPos() {
-        lastPos = motor.getCurrentPosition();
-        if (posList.size() >= WINDOW) {
-            posList.removeFirst();
+        if (velocityList.size() >= WINDOW) {
+            velocityList.removeFirst();
         }
-        posList.addLast(lastPos);
+        velocityList.addLast(motor.getVelocity());
     }
 }

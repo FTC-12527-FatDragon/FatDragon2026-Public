@@ -9,6 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
+import com.arcrobotics.ftclib.command.Command;
+import org.firstinspires.ftc.teamcode.commands.IntakeSmartCommand;
+import org.firstinspires.ftc.teamcode.subsystems.wheel.Wheel;
+
 /**
  * Intake Subsystem
  *
@@ -99,5 +103,11 @@ public class Intake extends SubsystemBase {
         else {
             intakeMotor.setPower(0);
         }
+    }
+
+    // --- Command Factories ---
+
+    public Command smartIntakeCommand(Wheel wheel, boolean reverse) {
+        return new IntakeSmartCommand(this, wheel, reverse);
     }
 }

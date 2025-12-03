@@ -10,6 +10,9 @@ public class WheelConstants {
     public static String wheelServoName = "wheelServo";
     public static String upwardServoName = "upwardServo";//continuous
 
+    // Add Color Sensor Name
+    public static String colorSensorName = "colorSensor";
+
     public static double offPosition = 0.2;
 
     public static double posIDLE = 0;
@@ -32,4 +35,8 @@ public class WheelConstants {
     
     // The index of the starting position (0.832)
     public static int INITIAL_SLOT_INDEX = 2;
+    
+    // Color Sensor Thresholds (Example values, tune these!)
+    public static double detectionThresholdCM = 3.0; // Distance to detect a sample
+    public static int blueHueThreshold = 180; // Approx hue for blue vs yellow/red
 }

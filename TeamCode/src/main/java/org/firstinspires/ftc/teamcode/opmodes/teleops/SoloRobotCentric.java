@@ -155,10 +155,10 @@ public class SoloRobotCentric extends CommandOpMode {
 
         // Gimbal Servo Manual Control
         if (gamepad1.dpad_left) {
-            Gimbal.gimbalServoPosition += 0.001;
+            Gimbal.setTargetPosition(Gimbal.getTargetPosition() + 0.001);
             gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
         } else if (gamepad1.dpad_right) {
-            Gimbal.gimbalServoPosition -= 0.001;
+            Gimbal.setTargetPosition(Gimbal.getTargetPosition() - 0.001);
             gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
         }
 
@@ -166,7 +166,7 @@ public class SoloRobotCentric extends CommandOpMode {
 
         telemetry.addData("Mode", "Robot Centric (No OD)");
         telemetry.addData("Wheel Position", wheel.customWheelPos);
-        telemetry.addData("Gimbal Position", Gimbal.gimbalServoPosition);
+        telemetry.addData("Gimbal Position", Gimbal.getTargetPosition());
         telemetry.update();
     }
 }

@@ -1,8 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems.wheel;
 
+import android.graphics.Color;
+
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
  * Wheel Subsystem
@@ -11,11 +19,14 @@ import com.qualcomm.robotcore.hardware.Servo;
  * and another servo for moving it up and down.
  * 
  * Now includes an internal State Machine for automated firing sequences.
+ * AND Color Sensor integration for sample detection.
  */
 public class Wheel extends SubsystemBase {
 
     public final Servo wheelServo;
     public final Servo upwardServo;
+    public final ColorSensor colorSensor;
+    public final DistanceSensor distanceSensor;
 
     public double upwardServoPosition = WheelConstants.upwardServoLow;
     public double customWheelPos = WheelConstants.posIDLE;
@@ -26,16 +37,24 @@ public class Wheel extends SubsystemBase {
     public int currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
     
     private long stateTimer = 0;
+    
+    // Cache for color values
+    private final float[] hsvValues = {0F, 0F, 0F};
 
     /**
      * Constructor for Wheel.
-     * Initializes the servos.
+     * Initializes the servos and color sensor.
      *
-     * @param hardwareMap The hardware map to get the servos.
+     * @param hardwareMap The hardware map to get the devices.
      */
     public Wheel(HardwareMap hardwareMap) {
         wheelServo = hardwareMap.get(Servo.class, WheelConstants.wheelServoName);
         upwardServo = hardwareMap.get(Servo.class, WheelConstants.upwardServoName);
+        
+        // Initialize Color/Distance Sensor
+        // Note: On Rev Color Sensor V3, these are usually the same device name
+        colorSensor = hardwareMap.get(ColorSensor.class, WheelConstants.colorSensorName);
+        distanceSensor = hardwareMap.get(DistanceSensor.class, WheelConstants.colorSensorName);
     }
 
     /**
@@ -63,6 +82,10 @@ public class Wheel extends SubsystemBase {
         FIRING_UP,   // Servo moves UP
         FIRING_WAIT, // Waiting for shot to leave
         FIRING_DOWN  // Servo moves DOWN
+    }
+    
+    public enum SampleColor {
+        NONE, RED, BLUE, YELLOW
     }
 
     /**
@@ -113,6 +136,47 @@ public class Wheel extends SubsystemBase {
         currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
         setCustomWheelPos(WheelConstants.WHEEL_SLOTS[currentSlotIndex]);
     }
+    
+    /**
+     * Checks if a sample is currently detected in the wheel/magazine.
+     * @return true if distance is less than threshold.
+     */
+    public boolean hasSample() {
+        return distanceSensor.getDistance(DistanceUnit.CM) < WheelConstants.detectionThresholdCM;
+    }
+    
+    /**
+     * Gets the color of the detected sample.
+     * Uses HSV Hue to distinguish colors.
+     */
+    public SampleColor getSampleColor() {
+        if (!hasSample()) return SampleColor.NONE;
+        
+        // Convert RGB to HSV
+        Color.RGBToHSV(
+            (int) (colorSensor.red() * 255),
+            (int) (colorSensor.green() * 255),
+            (int) (colorSensor.blue() * 255),
+            hsvValues
+        );
+        
+        float hue = hsvValues[0];
+        
+        // Simple Hue Thresholding (Tune these values!)
+        // Yellow: 60-100
+        // Blue: 200-240
+        // Red: 0-30 or 330-360
+        
+        if (hue > 200 && hue < 260) {
+            return SampleColor.BLUE;
+        } else if (hue > 45 && hue < 120) {
+            return SampleColor.YELLOW;
+        } else if (hue < 30 || hue > 330) {
+            return SampleColor.RED;
+        }
+        
+        return SampleColor.NONE; // Unknown color
+    }
 
     /**
      * Periodic method called by the CommandScheduler.
@@ -120,6 +184,7 @@ public class Wheel extends SubsystemBase {
      */
     @Override
     public void periodic() {
+        // ... (existing periodic code) ...
         // --- State Machine Logic ---
         switch (launcherState) {
             case IDLE:
@@ -151,10 +216,27 @@ public class Wheel extends SubsystemBase {
         // --- Hardware Write ---
         upwardServo.setPosition(upwardServoPosition);
         
-        if (wheelState == WheelServoState.CUSTOM) {
-            wheelServo.setPosition(customWheelPos);
-        } else {
-            wheelServo.setPosition(wheelState.servoPos);
+        // Only allow wheel rotation if NOT firing to prevent jamming
+        if (launcherState == LauncherState.IDLE) {
+            if (wheelState == WheelServoState.CUSTOM) {
+                wheelServo.setPosition(customWheelPos);
+            } else {
+                wheelServo.setPosition(wheelState.servoPos);
+            }
         }
+    }
+
+    // --- Command Factories ---
+    
+    public Command fireCommand() {
+        return new InstantCommand(this::fire, this);
+    }
+
+    public Command nextSlotCommand() {
+        return new InstantCommand(this::nextSlot, this);
+    }
+
+    public Command resetSlotCommand() {
+        return new InstantCommand(this::resetSlot, this);
     }
 }

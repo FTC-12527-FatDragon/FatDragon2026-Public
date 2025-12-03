@@ -27,10 +27,11 @@ public class GimbalManualControlCommand extends CommandBase {
 
     @Override
     public void execute() {
-        Gimbal.gimbalServoPosition += adjustAmount;
+        double newPos = Gimbal.getTargetPosition() + adjustAmount;
         // Optional: Clamp values to 0.0 - 1.0
-        if (Gimbal.gimbalServoPosition > 1.0) Gimbal.gimbalServoPosition = 1.0;
-        if (Gimbal.gimbalServoPosition < 0.0) Gimbal.gimbalServoPosition = 0.0;
+        if (newPos > 1.0) newPos = 1.0;
+        if (newPos < 0.0) newPos = 0.0;
+        Gimbal.setTargetPosition(newPos);
     }
 
     @Override

@@ -11,7 +11,7 @@ public class GimbalResetCommand extends InstantCommand {
     public GimbalResetCommand(Gimbal gimbal) {
         super(
             () -> {
-                Gimbal.gimbalServoPosition = GimbalConstants.posIDLE;
+                Gimbal.setTargetPosition(GimbalConstants.posIDLE);
                 gimbal.setGimbalState(Gimbal.GimbalServoState.AIM);
             },
             gimbal

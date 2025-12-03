@@ -36,7 +36,7 @@ public class GimbalAutoAimCommand extends CommandBase {
         double aimPos = AimCalculator.getAutoAimServoPos(robotPose, targetPose);
         
         // Update gimbal position
-        Gimbal.gimbalServoPosition = aimPos;
+        Gimbal.setTargetPosition(aimPos);
         
         // Note: Gimbal.periodic() will automatically apply this position because state is AIM
     }

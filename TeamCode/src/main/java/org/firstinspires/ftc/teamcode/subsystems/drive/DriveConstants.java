@@ -18,10 +18,12 @@ public class DriveConstants {
     public static String rightFrontMotorName = "rightFrontMotor";
     public static String rightBackMotorName = "rightBackMotor";
 
-    // Odometry offsets (in mm) for Pinpoint (Dead Wheels)
+    // Odometry offsets (in mm, converted to inches) for Pinpoint (Dead Wheels)
     // If the sensor is not at the center of the robot, measure these values.
     // Positive X is forward, Positive Y is left.
-    public static double xPoseDW = 0, yPoseDW = 0;
+    // xPoseDW corresponds to strafe pod X offset
+    // yPoseDW corresponds to forward pod Y offset
+    public static double xPoseDW = 7.8 / 25.4, yPoseDW = 72.3 / 25.4;
 
     // Drive behavior constants
     public static double strafingBalance = 1.1; // Multiplier to correct strafing drift
@@ -32,8 +34,13 @@ public class DriveConstants {
     // Pedro Pathing / Tuning Constants
     public static double linearScalar = 1.00026; // Linear scaling factor for localization
     public static double angularScalar = 0.99414; // Angular scaling factor for localization
-    public static double forwardVelocity = 63.966; // Max forward velocity (inches/sec)
-    public static double strafeVelocity = 26.744; // Max strafe velocity (inches/sec)
+    
+    // Max velocities (Theoretical 312RPM ~62 in/s). 
+    // Set higher (80) to ensure full power output in TeleOp when stick is maxed.
+    // NOTE: In Auto paths, limit velocity to < 60 in/s to avoid tracking lag.
+    public static double forwardVelocity = 80.0; 
+    public static double strafeVelocity = 65.0; 
+    
     public static double forwardAcceleration = -32.6419; // Forward acceleration (inches/sec^2)
     public static double strafeAcceleration = -95.1316; // Strafe acceleration (inches/sec^2)
 }

@@ -12,10 +12,10 @@ public class IntakeConstants {
     public static String intakeMotorName = "intakeMotor";
 
     /** Power level for normal intake operation (0.0 to 1.0) */
-    public static double intakePower = 1.0;
+    public static double intakePower = -1.0;
     
     /** Power level for reversing the intake (should be negative) */
-    public static double reversedPower = -0.7;
+    public static double reversedPower = 0.7;
     
     /** Current threshold for stall detection (in Amps) */
     public static double stallCurrentThreshold = 7.0;

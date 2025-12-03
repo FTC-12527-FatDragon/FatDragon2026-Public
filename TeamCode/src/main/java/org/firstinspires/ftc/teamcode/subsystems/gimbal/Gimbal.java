@@ -4,6 +4,12 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import com.arcrobotics.ftclib.command.Command;
+import org.firstinspires.ftc.teamcode.commands.GimbalAutoAimCommand;
+import org.firstinspires.ftc.teamcode.commands.GimbalManualControlCommand;
+import org.firstinspires.ftc.teamcode.commands.GimbalResetCommand;
+import org.firstinspires.ftc.teamcode.subsystems.drive.MecanumDrive;
+
 /**
  * Gimbal Subsystem
  *
@@ -14,9 +20,25 @@ public class Gimbal extends SubsystemBase {
 
     public final Servo gimbalServo;
     // Initialize with the Constant value
-    public static double gimbalServoPosition = GimbalConstants.posIDLE;
+    private static double gimbalServoPosition = GimbalConstants.posIDLE;
 
     public GimbalServoState gimbalState = GimbalServoState.IDLE;
+
+    /**
+     * Sets the target position for the gimbal servo (0.0 - 1.0).
+     * @param pos Target position.
+     */
+    public static void setTargetPosition(double pos) {
+        gimbalServoPosition = pos;
+    }
+
+    /**
+     * Gets the current target position of the gimbal servo.
+     * @return Current target position (0.0 - 1.0).
+     */
+    public static double getTargetPosition() {
+        return gimbalServoPosition;
+    }
 
     /**
      * Constructor for Gimbal.
@@ -49,5 +71,19 @@ public class Gimbal extends SubsystemBase {
     public void periodic() {
         if (gimbalState != GimbalServoState.AIM) gimbalServo.setPosition(gimbalState.servoPos);
         else gimbalServo.setPosition(gimbalServoPosition);
+    }
+
+    // --- Command Factories ---
+
+    public Command autoAimCommand(MecanumDrive drive) {
+        return new GimbalAutoAimCommand(this, drive);
+    }
+
+    public Command manualControlCommand(double adjustAmount) {
+        return new GimbalManualControlCommand(this, adjustAmount);
+    }
+
+    public Command resetCommand() {
+        return new GimbalResetCommand(this);
     }
 }

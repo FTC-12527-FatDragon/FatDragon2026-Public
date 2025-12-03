@@ -109,28 +109,28 @@ public class Solo extends CommandOpMode {
         new FunctionalButton(
                 () -> gamepadEx1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
         ).whenPressed(
-                new LaunchSingleCommand(wheel)
+                wheel.fireCommand()
         );
 
         // B Button: Intake Reverse
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.B)
         ).whenHeld(
-                new IntakeRunCommand(intake, true)
+                intake.smartIntakeCommand(wheel, true)
         );
 
-        // Left Trigger: Intake Normal
+        // Left Trigger: Intake Normal (Smart: Stops if Full)
         new FunctionalButton(
                 () -> gamepadEx1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5
         ).whenHeld(
-                new IntakeRunCommand(intake, false)
+                intake.smartIntakeCommand(wheel, false)
         );
 
         // X Button: Next Slot
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.X)
         ).whenPressed(
-                new WheelNextSlotCommand(wheel)
+                wheel.nextSlotCommand()
         );
         
         // --- Gimbal Controls ---
@@ -139,28 +139,28 @@ public class Solo extends CommandOpMode {
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_DOWN)
         ).whileHeld(
-                new org.firstinspires.ftc.teamcode.commands.GimbalAutoAimCommand(gimbal, drive)
+                gimbal.autoAimCommand(drive)
         );
 
         // D-Pad Up: Reset to Center (When Pressed)
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_UP)
         ).whenPressed(
-                new org.firstinspires.ftc.teamcode.commands.GimbalResetCommand(gimbal)
+                gimbal.resetCommand()
         );
 
         // D-Pad Left: Manual Turn Left (While Held)
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_LEFT)
         ).whileHeld(
-                new org.firstinspires.ftc.teamcode.commands.GimbalManualControlCommand(gimbal, 0.001)
+                gimbal.manualControlCommand(0.001)
         );
 
         // D-Pad Right: Manual Turn Right (While Held)
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_RIGHT)
         ).whileHeld(
-                new org.firstinspires.ftc.teamcode.commands.GimbalManualControlCommand(gimbal, -0.001)
+                gimbal.manualControlCommand(-0.001)
         );
 
         // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
@@ -185,7 +185,7 @@ public class Solo extends CommandOpMode {
         telemetry.addData("Y (Inches)", drive.getPose().getY());
         telemetry.addData("Heading (Radians)", drive.getPose().getHeading());
         telemetry.addData("Wheel Position", wheel.customWheelPos);
-        telemetry.addData("Gimbal Position", Gimbal.gimbalServoPosition);
+        telemetry.addData("Gimbal Position", Gimbal.getTargetPosition());
         telemetry.update();
     }
 }

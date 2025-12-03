@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
@@ -13,12 +14,29 @@ public class MecanumDrive extends SubsystemBase {
     public MecanumDrive(HardwareMap hardwareMap) {
         follower = Constants.createFollower(hardwareMap);
         
+        // Set all drive motors to BRAKE mode for active stopping
+        setMotorZeroPowerBehavior(hardwareMap, DcMotor.ZeroPowerBehavior.BRAKE);
+        
         // Load the saved pose from Auto if available. 
         // If PoseStorage.currentPose is (0,0,0) it might mean Auto didn't run, 
         // but since we initialize it to (0,0,0) anyway, it's fine.
         follower.setStartingPose(PoseStorage.currentPose);
         
         follower.startTeleopDrive();
+    }
+    
+    /**
+     * Helper method to set the ZeroPowerBehavior for all drive motors.
+     */
+    private void setMotorZeroPowerBehavior(HardwareMap hardwareMap, DcMotor.ZeroPowerBehavior behavior) {
+        try {
+            hardwareMap.get(DcMotor.class, DriveConstants.leftFrontMotorName).setZeroPowerBehavior(behavior);
+            hardwareMap.get(DcMotor.class, DriveConstants.leftBackMotorName).setZeroPowerBehavior(behavior);
+            hardwareMap.get(DcMotor.class, DriveConstants.rightFrontMotorName).setZeroPowerBehavior(behavior);
+            hardwareMap.get(DcMotor.class, DriveConstants.rightBackMotorName).setZeroPowerBehavior(behavior);
+        } catch (Exception e) {
+            // Log error or ignore if testing without full hardware
+        }
     }
 
     @Override

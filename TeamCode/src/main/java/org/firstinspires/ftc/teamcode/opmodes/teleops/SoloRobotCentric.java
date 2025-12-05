@@ -50,7 +50,8 @@ public class SoloRobotCentric extends CommandOpMode {
     public void initialize() {
         // --- Initialize Drive Motors Directly ---
         leftFront = hardwareMap.get(DcMotor.class, DriveConstants.leftFrontMotorName);
-        leftRear = hardwareMap.get(DcMotor.class, DriveConstants.leftBackMotorName);
+        leftRear = hardwareMap.get(DcMotor.class, DriveConstants
+                .leftBackMotorName);
         rightFront = hardwareMap.get(DcMotor.class, DriveConstants.rightFrontMotorName);
         rightRear = hardwareMap.get(DcMotor.class, DriveConstants.rightBackMotorName);
 

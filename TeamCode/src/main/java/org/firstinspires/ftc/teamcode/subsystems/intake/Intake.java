@@ -103,7 +103,7 @@ public class Intake extends SubsystemBase {
         else {
             intakeMotor.setPower(0);
         }
-    }
+        }
 
     // --- Command Factories ---
 

@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.utils.DcMotorRe;
 import org.firstinspires.ftc.teamcode.utils.Util;
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.teamcode.utils.Util;
 public class Shooter extends SubsystemBase {
     public final DcMotorRe shooterUp, shooterDown;
     public final PIDController pidControllerUp, pidControllerDown;
+    private final VoltageSensor voltageSensor;
     public static double shooterOpenLoopPower = -1;
 
     /**
@@ -55,6 +57,8 @@ public class Shooter extends SubsystemBase {
                 ShooterConstants.kI, ShooterConstants.kD);
         pidControllerDown = new PIDController(ShooterConstants.kP,
                 ShooterConstants.kI, ShooterConstants.kD);
+        
+        voltageSensor = hardwareMap.voltageSensor.iterator().next();
     }
 
     /**
@@ -145,6 +149,16 @@ public class Shooter extends SubsystemBase {
                 double powerUp = pidUp + ff;
                 double powerDown = pidDown + ff;
                 
+                // Voltage Compensation
+                if (ShooterConstants.ENABLE_VOLTAGE_COMPENSATION) {
+                    double voltage = voltageSensor.getVoltage();
+                    if (voltage > 0) {
+                        double compensationFactor = ShooterConstants.NOMINAL_VOLTAGE / voltage;
+                        powerUp *= compensationFactor;
+                        powerDown *= compensationFactor;
+                    }
+                }
+                
                 shooterUp.setPower(powerUp);
                 shooterDown.setPower(powerDown);
             } else {
@@ -153,8 +167,17 @@ public class Shooter extends SubsystemBase {
             }
         }
         else {
-            shooterUp.setPower(shooterOpenLoopPower);
-            shooterDown.setPower(shooterOpenLoopPower);
+            double power = shooterOpenLoopPower;
+            // Voltage Compensation for Open Loop too
+            if (ShooterConstants.ENABLE_VOLTAGE_COMPENSATION) {
+                double voltage = voltageSensor.getVoltage();
+                if (voltage > 0) {
+                    double compensationFactor = ShooterConstants.NOMINAL_VOLTAGE / voltage;
+                    power *= compensationFactor;
+                }
+            }
+            shooterUp.setPower(power);
+            shooterDown.setPower(power);
         }
         shooterUp.updateLastPos();
         shooterDown.updateLastPos();

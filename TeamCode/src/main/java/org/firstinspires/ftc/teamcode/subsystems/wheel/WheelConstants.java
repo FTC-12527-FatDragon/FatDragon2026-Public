@@ -25,16 +25,26 @@ public class WheelConstants {
     
     public static long launchWaitTime = 450;
 
-    // Wheel Slots (Generated based on start 0.832, step 0.074)
-    // Added 0.980 and 0.906 at the beginning.
+    // Wheel Slots (Start 0.0, step 0.07407, max < 1.0)
     public static double[] WHEEL_SLOTS = {
-            0.980, 0.906, 
-            0.832, 0.758, 0.684, 0.610, 0.536, 0.462,
-            0.388, 0.314, 0.240, 0.166, 0.092, 0.018
+            0.00000,
+            0.07407,
+            0.14814,
+            0.22221,
+            0.29628,
+            0.37035,
+            0.44442,
+            0.51849,
+            0.59256,
+            0.66663,
+            0.74070,
+            0.81477,
+            0.88884,
+            0.96291
     };
     
-    // The index of the starting position (0.832)
-    public static int INITIAL_SLOT_INDEX = 2;
+    // The index of the starting position (Default to 0 or first slot)
+    public static int INITIAL_SLOT_INDEX = 0;
     
     // Color Sensor Thresholds (Example values, tune these!)
     public static double detectionThresholdCM = 3.0; // Distance to detect a sample

@@ -23,6 +23,9 @@ public class ShooterConstants {
     public static double kV = 0.0005; // Velocity gain: Power / MaxVelocity (approx)
     public static double kS = 0.0;    // Static friction compensation
     
+    public static boolean ENABLE_VOLTAGE_COMPENSATION = false; // Set to true to enable voltage compensation
+    public static double NOMINAL_VOLTAGE = 12.0; // Nominal voltage to compensate towards
+
     public static double stopPower = 0;
     
     // Power levels for Open Loop control

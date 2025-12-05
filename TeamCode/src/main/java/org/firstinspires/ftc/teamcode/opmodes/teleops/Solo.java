@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleops;
 
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -61,6 +63,9 @@ public class Solo extends CommandOpMode {
     @Override
     public void initialize() {
         drive = new MecanumDrive(hardwareMap);
+        // Pass telemetry to drive for debugging
+        drive.setTelemetry(telemetry);
+        
         shooter = new Shooter(hardwareMap);
         intake = new Intake(hardwareMap);
         wheel = new Wheel(hardwareMap);
@@ -153,14 +158,14 @@ public class Solo extends CommandOpMode {
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_LEFT)
         ).whileHeld(
-                gimbal.manualControlCommand(0.001)
+                gimbal.manualControlCommand(0.01) // Changed from 0.001 to 0.01
         );
 
         // D-Pad Right: Manual Turn Right (While Held)
         new FunctionalButton(
                 () -> gamepadEx1.getButton(GamepadKeys.Button.DPAD_RIGHT)
         ).whileHeld(
-                gimbal.manualControlCommand(-0.001)
+                gimbal.manualControlCommand(-0.01) // Changed from -0.001 to -0.01
         );
 
         // Test functionality: Move to NEAR_SHOT_1 when Right Stick Button is pressed
@@ -181,11 +186,46 @@ public class Solo extends CommandOpMode {
 
         CommandScheduler.getInstance().run();
 
-        telemetry.addData("X (Inches)", drive.getPose().getX());
-        telemetry.addData("Y (Inches)", drive.getPose().getY());
-        telemetry.addData("Heading (Radians)", drive.getPose().getHeading());
+        Pose currentPose = drive.getPose();
+
+        telemetry.addData("X (Inches)", currentPose.getX());
+        telemetry.addData("Y (Inches)", currentPose.getY());
+        telemetry.addData("Heading (Radians)", currentPose.getHeading());
         telemetry.addData("Wheel Position", wheel.customWheelPos);
         telemetry.addData("Gimbal Position", Gimbal.getTargetPosition());
         telemetry.update();
+
+        // Draw Robot on Dashboard
+        TelemetryPacket packet = new TelemetryPacket();
+        Canvas fieldOverlay = packet.fieldOverlay();
+        drawRobot(fieldOverlay, currentPose);
+        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+    }
+    
+    private void drawRobot(Canvas canvas, Pose pose) {
+        canvas.setStroke("blue");
+        canvas.setStrokeWidth(1);
+        double r = 7.0; // Half size of robot
+        double heading = pose.getHeading();
+        double cos = Math.cos(heading), sin = Math.sin(heading);
+        
+        // Rotate 4 corners
+        double[] x = new double[5];
+        double[] y = new double[5];
+        double[] cx = {r, r, -r, -r, r};
+        double[] cy = {r, -r, -r, r, r};
+        
+        for(int i=0; i<5; i++) {
+            x[i] = pose.getX() + (cx[i] * cos - cy[i] * sin);
+            y[i] = pose.getY() + (cx[i] * sin + cy[i] * cos);
+        }
+        
+        canvas.strokePolyline(x, y);
+        
+        // Front Line (Red)
+        canvas.setStroke("red");
+        double fx = pose.getX() + r * cos;
+        double fy = pose.getY() + r * sin;
+        canvas.strokeLine(pose.getX(), pose.getY(), fx, fy);
     }
 }

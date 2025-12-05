@@ -36,6 +36,10 @@ public class Wheel extends SubsystemBase {
 
     public int currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
     
+    // Flag to indicate direction of travel for slots
+    // true = increasing index (forward), false = decreasing index (backward)
+    private boolean isTraversingForward = true;
+    
     private long stateTimer = 0;
     
     // Cache for color values
@@ -124,16 +128,38 @@ public class Wheel extends SubsystemBase {
         }
     }
 
+    /**
+     * Moves to the next slot.
+     * Logic:
+     * - If moving forward (isTraversingForward=true), increment index.
+     * - If we reach the end (last index), switch direction to backward.
+     * - If moving backward (isTraversingForward=false), decrement index.
+     * - If we reach the start (index 0), switch direction to forward.
+     */
     public void nextSlot() {
-        currentSlotIndex++;
-        if (currentSlotIndex >= WheelConstants.WHEEL_SLOTS.length) {
-            currentSlotIndex = 0; 
+        if (isTraversingForward) {
+            currentSlotIndex++;
+            if (currentSlotIndex >= WheelConstants.WHEEL_SLOTS.length - 1) {
+                // Reached the end, clamp to max and reverse direction
+                currentSlotIndex = WheelConstants.WHEEL_SLOTS.length - 1;
+                isTraversingForward = false;
+            }
+        } else {
+            currentSlotIndex--;
+            if (currentSlotIndex <= 0) {
+                // Reached the start, clamp to 0 and reverse direction
+                currentSlotIndex = 0;
+                isTraversingForward = true;
+            }
         }
         setCustomWheelPos(WheelConstants.WHEEL_SLOTS[currentSlotIndex]);
     }
 
     public void resetSlot() {
         currentSlotIndex = WheelConstants.INITIAL_SLOT_INDEX;
+        // Reset direction logic too if needed? 
+        // Assuming starting at 0 implies moving forward initially.
+        isTraversingForward = true; 
         setCustomWheelPos(WheelConstants.WHEEL_SLOTS[currentSlotIndex]);
     }
     
@@ -184,7 +210,6 @@ public class Wheel extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        // ... (existing periodic code) ...
         // --- State Machine Logic ---
         switch (launcherState) {
             case IDLE:
